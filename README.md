@@ -1,7 +1,7 @@
-# [Nombre del equipo]
+# Agile Team
 
-Integrantes: [nombre 1], [nombre 2], [nombre 3], [nombre 4], [nombre 5]
+Integrantes: Barcia Matías, De Vito Daniel, Ledesma Miguel, Militello Nicolás y Serra Leandro
 
-Producto: [una línea describiendo el producto — se completa en el TP1]
+Producto: Una app para que miembros de la comunidad Unlam, como estudiantes, docentes e invitados puedan reservar un lugar en el estacionamiento de la universidad.
 
-Segmento de la comunidad UNLaM: [se completa en el TP1]
+Segmento de la comunidad UNLaM: Personas que vayan a la Unlam en su propio vehículo y usen el estacionamiento de la universidad.
