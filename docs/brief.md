@@ -86,9 +86,9 @@ El usuario primario es el **usuario que reserva**. Es el perfil que sufre el pro
 
 Se contactó a los potenciales usuarios mediante una publicación en LinkedIn. Varias personas participaron de la encuesta, pero no todas estaban dispuestas a sumarse a las dos instancias de reunión propuestas; con tres de ellas se logró avanzar y agendar encuentros. Estos tres usuarios son:
 
-Marcos — estudiante, cursa de noche de lunes a viernes.
-Facundo — estudiante, cursa de noche varias veces por semana.
-Sofía — estudiante, cursa de noche varias veces por semana.
+ * Marcos — estudiante, cursa de noche de lunes a viernes.
+ * Facundo — estudiante, cursa de noche varias veces por semana.
+ * Sofía — estudiante, cursa de noche varias veces por semana.
 
 La pregunta #3 de la encuesta relevó además el tipo de dispositivo de cada uno: dos usan iPhone con iOS y el restante usa Android. Este dato es un primer insumo para definir para qué plataformas debe desarrollarse la app, aunque todavía no alcanza como muestra representativa de todo el segmento.
 
@@ -103,9 +103,7 @@ La pregunta #3 de la encuesta relevó además el tipo de dispositivo de cada uno
 | S1 | Asumimos que todos los usuarios que acuden a la universidad en vehículo propio también cuentan con un celular para hacer las reservas. | Resultado de la pregunta #2 de la encuesta realizada por LinkedIn, y del relevamiento de los usuarios del grupo de usuarios primario. | Sin validar |
 | **S2** | **Asumimos que a los usuarios del estacionamiento hoy les cuesta entre 5 y 10 minutos encontrar un lugar para estacionar.** |  Resultado de la pregunta #4 de la encuesta realizada por LinkedIn, el relevamiento de los usuarios del grupo de usuarios primario, y el resultado de las mediciones de observaciones directas del tiempo entre la llegada al estacionamiento y el momento en el que el vehículo queda estacionado en distintas franjas horarias y momentos representativos. | 🔴 **CRÍTICO** — Sin validar |
 | S3 | Asumimos que personas externas a la universidad utilizan el estacionamiento cuando no deberían (ej.: personas que acuden al Hospital Italiano). |  Respuesta del personal de seguridad a nuestras consultas sobre casos conocidos y resultados de las observaciones en  el estacionamiento que permitan detectar esta situación | Sin validar |
-| S4 | Asumimos que no siempre hay buena conexion a Internet en la entrada al estacionamiento de la Universidad | Resultado de las pruebas de conectividad con dispositivos
-móviles en la entrada al estacionamiento, en distintos momentos y
-utilizando diferentes operadores. |Sin validar |
+| S4 | Asumimos que no siempre hay buena conexion a Internet en la entrada al estacionamiento de la Universidad | Resultado de las pruebas de conectividad con dispositivos móviles en la entrada al estacionamiento, en distintos momentos y utilizando diferentes  operadores. |Sin validar |
 | S5 | Asumimos que la universidad va a autorizar y habilitar técnicamente la integración con la barrera del estacionamiento y con el sistema del Teatro. | Respuesta de las autoridades de la universidad a nuestras consultas sobre la viabilidad y autorización para ambas integraciones. | Sin validar |
 | S6 | Asumimos que la penalización por incumplimiento alcanza como incentivo para que los usuarios respeten sus reservas o las cancelen a tiempo. | Opinión de los usuarios del grupo primario durante el relevamiento sobre cómo creen que influiría en su comportamiento la existencia de una penalización por incumplir una reserva | Sin validar |
 | S7 | Asumimos que aproximadamente 1.500 vehículos diarios utilizan diariamente el estacionamiento de la universidad. | Datos oficiales de la universidad y resultados de las mediciones de conteos/estimaciones de capacidad y movimiento de ingresos y egresos de vehículos durante jornadas y horarios representativos. | Sin validar |
