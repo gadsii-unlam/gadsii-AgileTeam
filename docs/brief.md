@@ -90,11 +90,15 @@ El usuario primario es el **usuario que reserva** y, dentro de ese grupo, el per
 
 ## 6. Supuestos
 
-| # | Supuesto | Estado |
-|---|---|---|
-| S1 | Todos los usuarios que acuden a la universidad en vehículo propio también cuentan con un celular para hacer las reservas. | Sin validar |
-| **S2** | **A los usuarios del estacionamiento hoy les cuesta entre 5 y 10 minutos encontrar un lugar para estacionar.** | 🔴 **CRÍTICO** — Sin validar |
-| S3 | Personas externas a la universidad utilizan el estacionamiento cuando no deberían (ej.: personas que acuden al Hospital Italiano). | Sin validar |
+| # | Supuesto | | Evidencia para comprobarlo | Estado | 
+|---|---|---|---|
+| S1 | Asumimos que todos los usuarios que acuden a la universidad en vehículo propio también cuentan con un celular para hacer las reservas. | Consultar a U1, U2 y U3 si poseen celular y si lo llevan cuando concurren a la universidad | Sin validar |
+| **S2** | **Asumimos que a los usuarios del estacionamiento hoy les cuesta entre 5 y 10 minutos encontrar un lugar para estacionar.** | Medir mediante observacion directa el tiempo entre la llegada al estacionamiento y el momento en el que el vehículo queda estacionado en distintas franjas horarias y momentos representativos, contrastandolo con lo que reporten U1, U2 y U3. | 🔴 **CRÍTICO** — Sin validar |
+| S3 | Asumimos que personas externas a la universidad utilizan el estacionamiento cuando no deberían (ej.: personas que acuden al Hospital Italiano). | Consultar a personal de seguridad sobre casos conocidos y realizar observaciones en el estacionamiento que permitan detectar esta situacion. | Sin validar |
+| S4 | Asumimos que no siempre hay buena conexion a Internet en la entrada al estacionamiento de la Universidad | Realizar pruebas de conectividad con dispositivos moviles en la entrada al estacionamiento, en distintos momentos y utilizando diferentes operadores. |Sin validar |
+| S5 | Asumimos que la universidad va a autorizar y habilitar técnicamente la integración con la barrera del estacionamiento y con el sistema del Teatro. | Consultar a las autoridades sobre la viabilidad y autorizacion para ambas integraciones. | Sin validar |
+| S6 | Asumimos que la penalización por incumplimiento alcanza como incentivo para que los usuarios respeten sus reservas o las cancelen a tiempo. | Consultar a U1, U2, y U3 como influiria en su comportamineto la existencia de una penalizacion a la hora de respetar o cancelar una reserva y que penalizacion considerarian suficiente para modificar su comportamiento. | Sin validar |
+| S7 | Asumimos que aproximadamente 1.500 vehículos diarios utilizan diariamente el estacionamiento de la universidad. | Obtener datos oficiales de la universidad o realizar conteos/estimaciones de capacidad y movimiento de ingresos y egresos de vehiculos durante jornadas y horarios representativos. | Sin validar |
 
 ### 🔴 Supuesto crítico: S2
 
@@ -103,11 +107,3 @@ El usuario primario es el **usuario que reserva** y, dentro de ese grupo, el per
 Los otros supuestos son distintos en naturaleza: si S1 resultara falso, el producto sigue teniendo sentido y solamente necesita un canal alternativo de reserva (tótem, web, mostrador). Si S3 resultara falso, se cae una de las razones para el control de acceso, pero la reserva sigue resolviendo el problema principal. **S2, en cambio, no tiene plan B: si se cae, se cae el producto.**
 
 **Cómo lo vamos a validar:** medir el tiempo real entre el ingreso al predio y el momento en que el vehículo queda estacionado, en distintas franjas horarias, combinando observación directa en el estacionamiento con lo que reporten U1, U2 y U3.
-
-### Supuestos adicionales identificados al consolidar el brief
-
-| # | Supuesto | Estado |
-|---|---|---|
-| S4 | La universidad va a autorizar y habilitar técnicamente la integración con la barrera del estacionamiento y con el sistema del Teatro. | Sin validar |
-| S5 | La penalización por incumplimiento alcanza como incentivo para que los usuarios respeten sus reservas o las cancelen a tiempo. | Sin validar |
-| S6 | La cifra de ~1.500 vehículos diarios es representativa; no contamos aún con un dato oficial de la universidad. | Sin validar |
