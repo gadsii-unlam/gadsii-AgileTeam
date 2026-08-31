@@ -90,7 +90,7 @@ El usuario primario es el **usuario que reserva** y, dentro de ese grupo, el per
 
 ## 6. Supuestos
 
-| # | Supuesto | | Evidencia para comprobarlo | Estado | 
+| # | Supuesto | Evidencia para comprobarlo | Estado | 
 |---|---|---|---|
 | S1 | Asumimos que todos los usuarios que acuden a la universidad en vehículo propio también cuentan con un celular para hacer las reservas. | Consultar a U1, U2 y U3 si poseen celular y si lo llevan cuando concurren a la universidad | Sin validar |
 | **S2** | **Asumimos que a los usuarios del estacionamiento hoy les cuesta entre 5 y 10 minutos encontrar un lugar para estacionar.** | Medir mediante observacion directa el tiempo entre la llegada al estacionamiento y el momento en el que el vehículo queda estacionado en distintas franjas horarias y momentos representativos, contrastandolo con lo que reporten U1, U2 y U3. | 🔴 **CRÍTICO** — Sin validar |
