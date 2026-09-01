@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 2 |
+| **Versión** | 2.1 |
 | **Fecha** | 31/08/2026 |
 | **Equipo** | Agile Team |
 | **Materia** | Gestión Aplicada al Desarrollo de Software II (3665) |
@@ -13,7 +13,7 @@
 
 ## Cambios respecto de la versión anterior
 
-Se ajustaron los supuestos, agregando la evidencia para confirmarlos o refutarlos, y se han homologado con los mencionados en el PDF. Además, se ha detallado más los usuarios con los que trabajaremos a lo largo del proyecto.
+Se confirma la disponibilidad de U1, U2 y U3 para dos reuniones: Una la ultima semana de agosto y la siguiente en la ultima semana de septiembre.
 
 ---
 
@@ -86,9 +86,9 @@ El usuario primario es el **usuario que reserva**. Es el perfil que sufre el pro
 
 Se contactó a los potenciales usuarios mediante una publicación en LinkedIn. Varias personas participaron de la encuesta, pero no todas estaban dispuestas a sumarse a las dos instancias de reunión propuestas; con tres de ellas se logró avanzar y agendar encuentros. Estos tres usuarios son:
 
- * Marcos — estudiante, cursa de noche de lunes a viernes.
- * Facundo — estudiante, cursa de noche varias veces por semana.
- * Sofía — estudiante, cursa de noche varias veces por semana.
+ * Marcos — estudiante, cursa de noche de lunes a viernes. Disponibilidad confirmada por parte de Marcos para una reunion en la ultima semana de agosto y una en la ultima semana de septiembre.
+ * Facundo — estudiante, cursa de noche varias veces por semana. Disponibilidad confirmada por parte de Facundo para una reunion en la ultima semana de agosto y una en la ultima semana de septiembre.
+ * Sofía — estudiante, cursa de noche varias veces por semana. Disponibilidad confirmada por parte de Sofía para una reunion en la ultima semana de agosto y una en la ultima semana de septiembre.
 
 La pregunta #3 de la encuesta relevó además el tipo de dispositivo de cada uno: dos usan iPhone con iOS y el restante usa Android. Este dato es un primer insumo para definir para qué plataformas debe desarrollarse la app, aunque todavía no alcanza como muestra representativa de todo el segmento.
 
