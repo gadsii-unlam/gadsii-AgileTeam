@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Wireframe — Unlam Parking — Alternativa B</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+    color: #222222;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px 0; }
+  .subtitle { font-size: 13px; color: #666666; margin: 0 0 20px 0; }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    border: 1px solid #999999;
+    background: #f2f2f2;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: #444444;
+    color: #ffffff;
+    border-color: #444444;
+  }
+
+  .layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* --- Marco de teléfono (baja fidelidad) --- */
+  .phone {
+    width: 300px;
+    min-height: 560px;
+    border: 2px solid #333333;
+    border-radius: 18px;
+    padding: 16px 14px;
+    background: #ffffff;
+    position: relative;
+  }
+  .phone-notch {
+    width: 60px;
+    height: 6px;
+    background: #999999;
+    border-radius: 3px;
+    margin: 0 auto 14px auto;
+  }
+  .screen-label {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #888888;
+    text-align: center;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #cccccc;
+    padding-bottom: 6px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* --- Elementos de bajo nivel de fidelidad --- */
+  .wf-line { height: 10px; background: #dddddd; margin: 6px 0; }
+  .wf-line.short { width: 60%; }
+  .wf-line.tiny { height: 8px; width: 40%; }
+
+  .wf-title { height: 16px; background: #cccccc; width: 70%; margin: 4px 0 14px 0; }
+
+  .wf-box {
+    border: 1px solid #999999;
+    background: #fafafa;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  .wf-box .wf-box-label {
+    font-size: 10px;
+    color: #999999;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .wf-field {
+    border: 1px solid #999999;
+    background: #ffffff;
+    padding: 8px;
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 10px;
+  }
+
+  .wf-button {
+    border: 1px solid #333333;
+    background: #eeeeee;
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .wf-button:hover { background: #e0e0e0; }
+  .wf-button.secondary {
+    border-style: dashed;
+    font-weight: normal;
+    background: #ffffff;
+  }
+
+  .wf-qr {
+    width: 120px;
+    height: 120px;
+    border: 1px dashed #999999;
+    margin: 10px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #999999;
+  }
+
+  .wf-state-toggle {
+    font-size: 10px;
+    color: #999999;
+    text-align: center;
+    margin-top: 16px;
+    border-top: 1px dashed #dddddd;
+    padding-top: 8px;
+  }
+  .wf-state-toggle a { color: #666666; cursor: pointer; text-decoration: underline; }
+
+  /* --- Panel de anotaciones --- */
+  .annotations {
+    flex: 1;
+    min-width: 280px;
+    max-width: 420px;
+    border-left: 1px dashed #cccccc;
+    padding-left: 20px;
+  }
+  .annotations h2 {
+    font-size: 14px;
+    margin: 0 0 10px 0;
+  }
+  .annotations ul {
+    padding-left: 18px;
+    margin: 0 0 18px 0;
+  }
+  .annotations li {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    color: #333333;
+  }
+  .annotations .tag {
+    display: inline-block;
+    font-size: 10px;
+    text-transform: uppercase;
+    background: #eeeeee;
+    border: 1px solid #cccccc;
+    padding: 1px 6px;
+    margin-right: 6px;
+  }
+
+  .map {
+    font-size: 12px;
+    color: #555555;
+    margin-bottom: 24px;
+    padding: 12px;
+    border: 1px dashed #cccccc;
+    background: #fafafa;
+  }
+  .map b { color: #222222; }
+</style>
+</head>
+<body>
+
+<h1>Wireframe de baja fidelidad — Unlam Parking</h1>
+<p class="subtitle">Alternativa B — privilegia el recuerdo en el tiempo · Flujo principal del MVP</p>
+
+<div class="map">
+  <b>Mapa de navegación:</b> Login → Inicio (estado) → Reservar → Confirmación y QR → vuelve a Inicio (ahora con reserva activa).
+  Desde Confirmación y QR también se puede ir a Cancelación, que vuelve a Confirmación y QR (si se arrepiente) o a Inicio sin reserva (si confirma).
+  Usá las pestañas para saltar directo a una pantalla, o los botones dentro del teléfono para recorrer el flujo real.
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-screen="login" onclick="goTo('login')">1. Login</div>
+  <div class="tab" data-screen="inicio" onclick="goTo('inicio')">2. Inicio</div>
+  <div class="tab" data-screen="reservar" onclick="goTo('reservar')">3. Reservar</div>
+  <div class="tab" data-screen="confirmacion" onclick="goTo('confirmacion')">4. Confirmación y QR</div>
+  <div class="tab" data-screen="cancelacion" onclick="goTo('cancelacion')">5. Cancelación</div>
+</div>
+
+<div class="layout">
+
+  <!-- TELEFONO -->
+  <div class="phone">
+    <div class="phone-notch"></div>
+
+    <!-- PANTALLA 1: LOGIN -->
+    <div class="screen" id="screen-login">
+      <div class="screen-label">Pantalla 1 · Login</div>
+      <div class="wf-title"></div>
+      <div class="wf-field">Usuario</div>
+      <div class="wf-field">Contraseña</div>
+      <div class="wf-button" onclick="goTo('inicio')">Ingresar</div>
+      <div class="wf-line tiny"></div>
+    </div>
+
+    <!-- PANTALLA 2: INICIO -->
+    <div class="screen" id="screen-inicio">
+      <div class="screen-label">Pantalla 2 · Inicio</div>
+
+      <div id="inicio-sin-reserva">
+        <div class="wf-box">
+          <div class="wf-box-label">Estado</div>
+          <div class="wf-line short"></div>
+          <div class="wf-line tiny"></div>
+        </div>
+        <div class="wf-button" onclick="goTo('reservar')">Reservar estacionamiento</div>
+      </div>
+
+      <div id="inicio-con-reserva" style="display:none;">
+        <div class="wf-box">
+          <div class="wf-box-label">Estado</div>
+          <div class="wf-line short"></div>
+          <div class="wf-line tiny"></div>
+          <div class="wf-line tiny"></div>
+        </div>
+        <div class="wf-button" onclick="goTo('confirmacion')">Ver mi QR</div>
+      </div>
+
+      <div class="wf-state-toggle">
+        Simular estado: <a onclick="setEstado('sin-reserva')">sin reserva</a> / <a onclick="setEstado('con-reserva')">con reserva</a>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: RESERVAR -->
+    <div class="screen" id="screen-reservar">
+      <div class="screen-label">Pantalla 3 · Reservar</div>
+      <div class="wf-title"></div>
+      <div class="wf-line tiny"></div>
+      <div class="wf-field">Fecha</div>
+      <div class="wf-field">Hora</div>
+      <div class="wf-line tiny short"></div>
+      <div class="wf-button" onclick="confirmarReserva()">Realizar reserva</div>
+      <div class="wf-button secondary" onclick="goTo('inicio')">Volver</div>
+    </div>
+
+    <!-- PANTALLA 4: CONFIRMACION Y QR -->
+    <div class="screen" id="screen-confirmacion">
+      <div class="screen-label">Pantalla 4 · Confirmación y QR</div>
+      <div class="wf-box">
+        <div class="wf-box-label">Reserva confirmada</div>
+        <div class="wf-line short"></div>
+        <div class="wf-line tiny"></div>
+        <div class="wf-line tiny short"></div>
+      </div>
+      <div class="wf-qr">QR</div>
+      <div class="wf-button secondary" onclick="goTo('inicio')">Volver al inicio</div>
+      <div class="wf-button secondary" onclick="goTo('cancelacion')">Cancelar reserva</div>
+    </div>
+
+    <!-- PANTALLA 5: CANCELACION -->
+    <div class="screen" id="screen-cancelacion">
+      <div class="screen-label">Pantalla 5 · Cancelación</div>
+      <div class="wf-box">
+        <div class="wf-box-label">Confirmación de cancelación</div>
+        <div style="font-size:14px; color:#333333; margin: 4px 0 6px 0;">¿Está seguro que desea cancelar su reserva?</div>
+        <div class="wf-line tiny"></div>
+      </div>
+      <div class="wf-button" onclick="confirmarCancelacion()">Sí, cancelar</div>
+      <div class="wf-button secondary" onclick="goTo('confirmacion')">No, volver</div>
+    </div>
+
+  </div>
+
+  <!-- ANOTACIONES -->
+  <div class="annotations" id="annotations">
+    <!-- se completa por JS según la pantalla activa -->
+  </div>
+
+</div>
+
+<script>
+  var estadoReserva = 'sin-reserva'; // 'sin-reserva' | 'con-reserva'
+  var currentScreen = 'login';
+
+  var notas = {
+    login: [
+      "<span class='tag'>Se simula</span> No se valida contra un sistema real; para el MVP alcanza con que la pantalla exista y redirija a Inicio.",
+      "<span class='tag'>Jerarquía</span> Un único objetivo por pantalla: identificarse. No compite con ninguna otra acción."
+    ],
+    inicio: [
+      "<span class='tag'>Decisión clave</span> Esta pantalla cambia según el estado de la reserva: es la misma ubicación siempre, y el usuario no tiene que recordar 'a qué menú ir' para reservar o para ver su reserva.",
+      "<span class='tag'>Jerarquía</span> El estado (¿tengo reserva o no?) es lo primero que se lee. El botón principal cambia de texto y de acción según ese estado, pero mantiene el mismo lugar y el mismo estilo.",
+      "<span class='tag'>Trade-off</span> Al no separar 'reservar' de 'ver mis reservas' en dos botones fijos, se resigna algo de literalidad a cambio de menos pantallas para recordar.",
+      "<span class='tag'>Nota de wireframe</span> El selector 'Simular estado' es solo para poder evaluar ambos estados en este wireframe; no existe en la app real."
+    ],
+    reservar: [
+      "<span class='tag'>Decisión clave</span> Fecha y hora conviven en la misma pantalla, en vez de dividirse en dos pasos separados: menos pantallas distintas para volver a aprender tras no usar la app por un tiempo.",
+      "<span class='tag'>Jerarquía</span> Los dos campos de reserva están al mismo nivel; el botón de acción primaria queda siempre al final, en la misma posición que en las demás pantallas.",
+      "<span class='tag'>Trade-off</span> Un usuario completamente nuevo recibe menos guía paso a paso que si fecha y hora estuvieran separadas (eso sí ocurre en la alternativa A)."
+    ],
+    confirmacion: [
+      "<span class='tag'>Decisión clave</span> Usa el mismo patrón visual que el resto de las pantallas (bloque de datos arriba, acción abajo), para que el usuario reconozca la estructura en vez de tener que recordar un diseño distinto.",
+      "<span class='tag'>Jerarquía</span> El QR es el elemento más grande de la pantalla, porque es lo que el usuario necesita mostrar al llegar al predio; los datos de la reserva quedan como contexto arriba.",
+      "<span class='tag'>Navegación</span> Se accede a esta misma pantalla tanto al confirmar una reserva nueva como al volver a Inicio con una reserva activa — es un único destino para 'ver mi reserva'."
+    ],
+    cancelacion: [
+      "<span class='tag'>Decisión clave</span> La cancelación no ocurre con una sola acción: primero pide confirmación explícita, para evitar que un toque accidental sobre 'Cancelar reserva' elimine algo que costó conseguir (recordemos que el usuario primario reservó justamente para asegurarse un lugar).",
+      "<span class='tag'>Navegación</span> Se invoca únicamente desde la pantalla Confirmación y QR, con el botón 'Cancelar reserva'; 'No, volver' regresa sin cambios y 'Sí, cancelar' lleva a Inicio ya sin reserva activa.",
+      "<span class='tag'>Jerarquía</span> Mismo patrón que el resto del flujo: un bloque de contenido arriba (la pregunta) y las acciones abajo, con la opción destructiva y la opción segura claramente diferenciadas por estilo de botón."
+    ]
+  };
+
+  function goTo(screen) {
+    document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+    document.getElementById('screen-' + screen).classList.add('active');
+
+    document.querySelectorAll('.tab').forEach(function(el){ el.classList.remove('active'); });
+    document.querySelector('.tab[data-screen="' + screen + '"]').classList.add('active');
+
+    currentScreen = screen;
+    renderInicioState();
+    renderAnotaciones();
+  }
+
+  function setEstado(estado) {
+    estadoReserva = estado;
+    renderInicioState();
+  }
+
+  function confirmarReserva() {
+    estadoReserva = 'con-reserva';
+    goTo('confirmacion');
+  }
+
+  function confirmarCancelacion() {
+    estadoReserva = 'sin-reserva';
+    goTo('inicio');
+  }
+
+  function renderInicioState() {
+    var sinReserva = document.getElementById('inicio-sin-reserva');
+    var conReserva = document.getElementById('inicio-con-reserva');
+    if (estadoReserva === 'sin-reserva') {
+      sinReserva.style.display = 'block';
+      conReserva.style.display = 'none';
+    } else {
+      sinReserva.style.display = 'none';
+      conReserva.style.display = 'block';
+    }
+  }
+
+  function renderAnotaciones() {
+    var lista = notas[currentScreen] || [];
+    var html = '<h2>Anotaciones de diseño</h2><ul>';
+    lista.forEach(function(n){ html += '<li>' + n + '</li>'; });
+    html += '</ul>';
+    document.getElementById('annotations').innerHTML = html;
+  }
+
+  // estado inicial
+  goTo('login');
+</script>
+
+</body>
+</html>
