@@ -2,25 +2,23 @@
 
 | | |
 |---|---|
-| **Versión** | 3.0 |
-| **Fecha** | 01/09/2026 |
+| **Versión** | 3.1 |
+| **Fecha** | 08/09/2026 |
 | **Equipo** | Agile Team |
 | **Materia** | Gestión Aplicada al Desarrollo de Software II (3665) |
 | **Cátedra** | Departamento de Ingeniería e Investigaciones Tecnológicas — Ingeniería Informática, UNLaM |
-| **Origen** | TP 2 - Análisis de Usuarios e Hipótesis de Valor |
+| **Origen** | TP 3 - Scope del MVP y Diseño de la Interacción |
 
 ---
 
 ## Cambios respecto de la versión anterior
 
-Esta versión incorpora los resultados del relevamiento realizado con usuarios reales para el TP2. Los cambios principales son:
+Esta versión incorpora las decisiones tomadas en la Parte 1 del TP3 ("Qué construir"). Los cambios principales son:
 
-- **El perfil de usuario hipotético fue reemplazado por el perfil real**, construido a partir de entrevistas no estructuradas realizadas por Microsoft Teams a tres usuarios del grupo primario (identificados como U1, U2 y U3, siguiendo el criterio de anonimización exigido: el repositorio es público y las personas entrevistadas no pertenecen a la materia).
-- Se agregan explícitamente las **necesidades, problemas y contexto de uso** relevados, que antes no estaban documentados con este nivel de detalle.
-- Se actualiza el **estado de los siete supuestos** definidos en el TP1: tres fueron confirmados y dos refutados con evidencia de las entrevistas, y dos quedan sin evidencia por ahora.
-- Se agrega la **hipótesis de valor**, que sintetiza el trabajo de relevamiento y va a guiar lo que se construya en el TP3.
-- Se revalida el **usuario primario**: los tres entrevistados fueron estudiantes, pero surgieron respuestas de docentes en la publicación de LinkedIn, por lo que el segmento (alumnos, docentes, no docentes e invitados) se mantiene sin cambios.
-- El supuesto crítico (S2) queda **confirmado**, lo cual sostiene la razón de ser del producto.
+- Se define el **scope del MVP**: qué funcionalidades quedan incluidas y cuáles quedan excluidas, justificando cada decisión en función de si ayuda o no a confirmar/refutar la hipótesis de valor del TP2.
+- Se aclara, para cada elemento incluido en el MVP, **qué se construye realmente** y **qué se simula o se resuelve a mano** en esta primera versión.
+- Se describe el **flujo principal** que va a recorrer el usuario dentro del scope definido, desde que abre la aplicación hasta que obtiene el valor prometido por la hipótesis.
+- Se seleccionan y fundamentan los **atributos de usabilidad priorizados** para el usuario primario, en base a los hallazgos del relevamiento del TP2.
 
 ---
 
@@ -68,7 +66,7 @@ Con Unlam Parking se evita la demora para estacionar reservando un lugar desde e
 4. **Distinguir tipos de vehículo** (auto, moto, bicicleta, etc.).
 5. **Penalizar a quien incumple** la reserva.
 
-> ⚠️ Sobre el punto 5: el relevamiento del TP2 (supuesto S6) sugiere que la penalización, por sí sola, podría no alcanzar como incentivo para que los usuarios respeten o cancelen a tiempo sus reservas — ver sección de Supuestos. Esto no se elimina del alcance, pero se marca como un punto a revisar en el diseño, ya que quizás requiera complementarse con otro mecanismo (recordatorios, ventanas de gracia, etc.).
+> ⚠️ Sobre el punto 5: el relevamiento del TP2 (supuesto S6) sugiere que la penalización, por sí sola, podría no alcanzar como incentivo para que los usuarios respeten o cancelen a tiempo sus reservas — ver sección de Supuestos. Esto no se elimina del alcance del producto, pero, como se detalla en la sección 9, queda **excluida del MVP**.
 
 ---
 
@@ -79,7 +77,7 @@ Con Unlam Parking se evita la demora para estacionar reservando un lugar desde e
 | **Estacionamiento** | Vincular la app con un lector de código QR y con la barrera del estacionamiento de la UNLaM, para validar la reserva en el ingreso. |
 | **Teatro** | Como los invitados también pueden usar el estacionamiento, deben poder seleccionar desde la app el evento al que asisten; eso requiere integrarse con el sistema del Teatro. |
 
-> ⚠️ La autorización y viabilidad técnica de ambas integraciones (supuesto S5) sigue sin evidencia — no hubo aún respuesta de las autoridades de la universidad al respecto. Es un riesgo abierto para el producto.
+> ⚠️ La autorización y viabilidad técnica de ambas integraciones (supuesto S5) sigue sin evidencia — no hubo aún respuesta de las autoridades de la universidad al respecto. Es un riesgo abierto para el producto. Por eso, como se detalla en la sección 9, la lectura de QR contra la barrera queda fuera del MVP y la integración con cuenta universitaria se simula en esta primera versión.
 
 ---
 
@@ -125,8 +123,6 @@ Si bien los tres entrevistados son estudiantes, hubo respuestas de docentes en l
 >
 > **Sabremos que estamos en lo correcto cuando** los usuarios que reserven su lugar logren estacionar en menos de 5 minutos desde su llegada al predio (frente a los 5-20 minutos actuales), y reporten una reducción en la necesidad de salir con anticipación o en el estrés asociado a no saber si van a encontrar lugar.
 
-Esta hipótesis se va a trabajar y refinar en la clase del 01/09, y va a determinar qué se construye en el TP3.
-
 ---
 
 ## 7. Supuestos — estado actualizado tras el relevamiento
@@ -165,3 +161,61 @@ Sí. Los tres usuarios entrevistados son estudiantes, lo cual valida el perfil e
 | **Empleado de seguridad** | Mecanismo alternativo de control de reservas cuando el usuario no logra levantar la barrera. | No (fuera del MVP) |
 
 La pregunta sobre tipo de dispositivo relevada en el contacto inicial por LinkedIn indicó una mezcla de iOS y Android entre los potenciales usuarios; es un primer insumo para definir plataformas de desarrollo, aunque todavía no alcanza como muestra representativa de todo el segmento.
+
+---
+
+## 9. Scope del MVP
+
+El MVP es lo mínimo necesario para testear la hipótesis de valor de la sección 6. No es el producto completo ni una versión reducida de todo: es lo justo para aprender si la hipótesis es correcta.
+
+### Incluido en el MVP
+
+| Incluido en el MVP | Para qué parte de la hipótesis sirve |
+|---|---|
+| Reservar un lugar en el estacionamiento. | Es la funcionalidad central de la app que ataca directamente el problema descrito. |
+| Cancelar la reserva. | Permite liberar un lugar reservado. Es necesaria para que el usuario comprenda que una reserva puede ser modificada por su voluntad. |
+| Ver la disponibilidad de lugares en el estacionamiento. | De esta funcionalidad depende la correcta reserva de un lugar. |
+| Integración con cuenta universitaria. | Los usuarios a quienes se presentará el MVP deben ver que sólo los miembros de la comunidad UNLaM pueden usar la app, para generar mayor confiabilidad. |
+
+### Excluido del MVP
+
+| Excluido del MVP | Por qué se excluye |
+|---|---|
+| Distinción entre tipos de vehículos (auto, moto, bicicleta, etc.). | Se puede asumir un único tipo de vehículo al inicio para validar la aceptación del producto. |
+| Penalización para usuarios que incumplen la reserva. | Es una funcionalidad útil una vez implementada en un contexto real de uso; el foco del MVP debe ser la gestión exitosa de la reserva, no el castigo por incumplirla. Coincide además con el supuesto S6, refutado en el TP2. |
+| Posibilidad de cubrir ambos estacionamientos. | Con contemplar un único estacionamiento en la app alcanza para probar la hipótesis. |
+| Lectura de QR generado para levantar la barrera. | Es necesario para automatizar y controlar el sistema, pero no es la funcionalidad que ataca el dolor del usuario primario. |
+| Liberación de reservas por vencimiento. | La app debe contemplarlo a futuro, pero no es lo principal para el usuario en esta primera versión. |
+
+---
+
+## 10. Qué se construye y qué se simula
+
+No todo lo que el usuario ve en el MVP tiene que estar construido de verdad. Para cada elemento incluido en el scope:
+
+| Elemento | Se construye | Se simula / se resuelve a mano | Por qué |
+|---|---|---|---|
+| Reservar un lugar en el estacionamiento. | Sí | N/A | Es la funcionalidad principal del producto. |
+| Cancelar la reserva. | Sí | N/A | Es funcional a la solución que se ofrece. |
+| Ver la disponibilidad de lugares en el estacionamiento. | Sí | N/A | De este dato depende la posibilidad de reservar un lugar. |
+| Integración con cuenta universitaria. | No | Se simula. | Vincular la app con la cuenta universitaria puede tardar mucho tiempo, ya que no depende únicamente del equipo del proyecto. |
+
+---
+
+## 11. Flujo principal del MVP
+
+El usuario abre la aplicación e inicia sesión con su cuenta validada como estudiante/profesor, ingresando un usuario y contraseña. Una vez que accede, visualiza un menú principal con dos botones: **"Reservar estacionamiento"** y **"Reservas solicitadas"**.
+
+El usuario presiona **"Reservar estacionamiento"** y se le redirige a un formulario con dos campos —fecha y hora— y un botón **"Realizar reserva"**. Ingresa la fecha y la hora en la que desea reservar el estacionamiento (limitado a un rango de 24 hs) y presiona **"Realizar reserva"**. Si hay disponibilidad, se le muestra un mensaje de confirmación con los datos del día y horario elegidos y los minutos de tolerancia, junto con un botón **"Continuar"** que lo devuelve al menú principal.
+
+Cuando el usuario llega a la universidad, abre la aplicación y presiona **"Reservas solicitadas"**. La app muestra la última reserva realizada junto con un código QR que contiene sus datos. El usuario acerca su dispositivo al lector de QR del estacionamiento; al escanearse, se levanta la barrera y el usuario ingresa al estacionamiento, finalizando así la interacción con la app.
+
+---
+
+## 12. Atributos de usabilidad priorizados
+
+Los atributos más relevantes para el usuario de Unlam Parking son:
+
+**Facilidad de aprendizaje.** Se busca que estacionar el vehículo sea lo más simple posible, para reducir el estrés que le genera al usuario esta acción. Si la app fuera caótica y difícil de aprender a usar, el usuario la descartaría rápidamente y preferiría seguir buscando lugar como hasta ahora.
+
+**Recuerdo en el tiempo.** Es relevante porque el usuario probablemente no use la app todos los días, ya que no todos necesitan ir a la universidad de lunes a viernes. Por eso es importante que, aunque pasen dos semanas desde el último uso, pueda recordar fácilmente cómo usarla para que siga siendo su opción cada vez que tenga que estacionar.
