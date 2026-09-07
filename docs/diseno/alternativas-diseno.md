@@ -56,4 +56,8 @@ Tres estructuras distintas para el mismo flujo (login → reservar → confirmar
 - Concentrar reserva, confirmación y acceso al QR en la misma pantalla reduce la cantidad de taps y de tiempo total, algo relevante para un usuario que llega justo de horario.
 - Costo: al mostrar más información y opciones juntas, la pantalla es más densa y menos "a prueba de errores" para un usuario que la usa por primera vez — hay menos guía explícita paso a paso.
 
-De las tres alternativas se seleccionó la alternativa B como propuesta final.
+---
+
+## Selección de la Propuesta Final
+
+De las tres alternativas se seleccionó la **alternativa B** como propuesta final.
