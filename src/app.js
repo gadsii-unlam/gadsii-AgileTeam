@@ -1,8 +1,8 @@
 const path = require('node:path');
 const express = require('express');
 const config = require('./config');
-const { MIN, aEpoch, partesLocales, etiquetaFecha } = require('./dominio/tiempo');
-const { opcionesReserva } = require('./dominio/disponibilidad');
+const { MIN, aEpoch, partesLocales, fechaLarga, etiquetaFecha } = require('./dominio/tiempo');
+const { opcionesReserva, turnosEnVentana, proximoTurnoFueraDeVentana } = require('./dominio/disponibilidad');
 const reservas = require('./dominio/reservas');
 const sesiones = require('./dominio/sesiones');
 const { registrarEvento } = require('./dominio/eventos');
@@ -31,6 +31,8 @@ function escribirCookieSesion(req, res, token) {
     maxAge: config.sesionDias * 24 * 60 * MIN,
   });
 }
+
+const minusculaInicial = (texto) => texto.charAt(0).toLowerCase() + texto.slice(1);
 
 // Sólo rutas internas, para que "volver" no pueda llevar a otro sitio.
 function rutaInterna(valor) {
@@ -146,9 +148,24 @@ function crearApp({ db, reloj = () => Date.now(), confiarProxy = 'loopback' }) {
 
   // --- Reservar ----------------------------------------------------------
   async function mostrarReservar(req, res, { error = null, status = 200 } = {}) {
-    const opciones = await opcionesReserva(db, reloj());
+    const ahora = reloj();
+    const opciones = await opcionesReserva(db, ahora);
+    // Si no hay nada para elegir: ¿están todos completos o no hay turnos en las próximas 24 h?
+    let sinOpciones = null;
+    if (opciones.length === 0) {
+      const proximo = turnosEnVentana(ahora).length === 0 ? proximoTurnoFueraDeVentana(ahora) : null;
+      sinOpciones = proximo
+        ? {
+            turno: `${fechaLarga(proximo.fecha)} a las ${proximo.hora} hs`,
+            desde: minusculaInicial(
+              `${etiquetaFecha(partesLocales(proximo.reservableDesdeMs).fecha, ahora)} a las ${partesLocales(proximo.reservableDesdeMs).hora} hs`
+            ),
+          }
+        : { completos: true };
+    }
     res.status(status).render('reservar', {
       opciones,
+      sinOpciones,
       error,
       fechaElegida: req.body?.fecha || opciones[0]?.fecha,
       horaElegida: req.body?.hora || null,

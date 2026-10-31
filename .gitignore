@@ -33,3 +33,4 @@ src/data/
 
 # Netlify CLI
 .netlify/
+src/PARA_USAR_PROD_BORRAR_NOMBRE.env

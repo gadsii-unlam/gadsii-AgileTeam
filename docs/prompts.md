@@ -19,6 +19,8 @@
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Comparar publicar desde la PC con Cloudflare contra Netlify; qué implica que la base deje de ser un archivo local | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Cómo agregar al resto del equipo como coautores del commit | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Migrar el despliegue a Netlify (URL única, sin depender de una PC encendida) y revisar si la app soporta que muchos usuarios reserven al mismo tiempo | TP 5 |
+|31/10/2026| Claude Opus 5.5 (Claude Code) | Corregir que un horario con lugares desaparezca antes de su hora de inicio y agregar un botón visible de cerrar sesión | TP 5 |
+|31/10/2026| Claude Opus 5.5 (Claude Code) | Reservar por turnos de cursada (8, 14 y 19 hs; sábados 8 y 14), quitar la ocupación simulada y agregar registro de usuarios; validar antes contra la documentación. Tras el análisis se descarta el registro (el scope define cuentas precargadas) y se mantiene la disponibilidad visible | TP 5 |
 
 ## Decisiones del MVP (TP5)
 
@@ -34,15 +36,15 @@
 | Ocupación compartida entre todos los usuarios, visible por franja | Equipo |
 | ~~Hosting: PC de un integrante + Cloudflare quick tunnel (la URL cambia en cada publicación)~~ Reemplazado por Netlify (ver abajo) | Equipo |
 | Contradicciones entre `docs/` y el prompt: gana la alternativa B sobre el flujo del brief §11, sin pantalla de administración, login validado con mensaje de error (H9), botón "Continuar", sólo correcciones H4/H9/H10 | Propuesto por la IA, aprobado por el equipo |
-| Capacidad de 15 lugares por franja de llegada, franjas independientes; ocupación simulada de "otros usuarios" | Propuesto por la IA, aprobado por el equipo |
-| Tolerancia de 15 minutos; franjas cada 30 min; reservas desde 15 min hasta 24 h hacia adelante; horario 07:00–22:30; domingos cerrado | Propuesto por la IA, aprobado por el equipo |
+| ~~Capacidad de 15 lugares por franja de llegada, franjas independientes; ocupación simulada de "otros usuarios"~~ Reemplazado por turnos (ver abajo) | Propuesto por la IA, aprobado por el equipo |
+| Tolerancia de 15 minutos; reservas hasta 24 h hacia adelante (la anticipación mínima de 15 min se cambió a 0: ver abajo); ~~franjas cada 30 min, horario 07:00–22:30~~ reemplazado por turnos (ver abajo); domingos cerrado | Propuesto por la IA, aprobado por el equipo |
 | Una sola reserva activa por usuario; "Llegué" habilitado desde 60 min antes; no se puede cancelar después de llegar o de vencida la tolerancia | Propuesto por la IA, aprobado por el equipo |
 | Log interno de eventos (login, login fallido, reserva creada/cancelada, "Llegué", cierre de sesión) exportable a CSV | Propuesto por la IA, aprobado por el equipo |
 | Contraseñas con hash bcrypt en la base; cookie de sesión HttpOnly con el hash del token guardado en la base | Propuesto por la IA, aprobado por el equipo |
 | Express 5 como framework web y pantallas renderizadas en el servidor con plantillas EJS (sin framework de front ni build) | IA |
 | ~~Módulo `node:sqlite` incluido en Node (en lugar de `better-sqlite3`), para no compilar módulos nativos~~ Reemplazado por `@libsql/client` al migrar a Netlify | IA |
 | Organización de `src/`: `dominio/` (lógica propia), `vistas/`, `public/`, `db/`, `scripts/`, `test/`; datos en `src/data/` fuera del repo | IA |
-| Contraseñas del seed generadas al azar y guardadas en `src/data/credenciales.txt` (fuera del repo); nombres de cuentas ficticios | IA |
+| Contraseñas del seed generadas al azar y guardadas en `src/data/credenciales-local.txt` / `credenciales-produccion.txt` según la base, sólo las vigentes (fuera del repo); nombres de cuentas ficticios | IA |
 | ~~Script `npm run publicar` que hace backup, levanta servidor y túnel y guarda la URL~~ Eliminado al migrar a Netlify; el servidor local escucha sólo en 127.0.0.1 | IA |
 | Límite de intentos de login, cabeceras de seguridad (CSP) y service worker que no guarda datos de reservas | IA |
 | Tests con `node:test` (lógica de disponibilidad/reservas y recorrido completo por HTTP) | IA |
@@ -54,3 +56,10 @@
 | Concurrencia: cada escritura (reservar, cancelar, «Llegué») es una sola sentencia SQL atómica con sus condiciones (cupo, reserva pendiente, estado), en lugar de "verificar y después guardar"; tests con reservas simultáneas desde varias conexiones | IA |
 | Límite de intentos de login y sesiones guardados en la base (no en memoria), porque en Netlify cada pedido puede atenderlo una instancia distinta | IA |
 | Backup como exportación JSON de todas las tablas (funciona con la base local y con Turso) | IA |
+| Cada horario se puede reservar hasta su hora de inicio (sin anticipación mínima); desaparece al empezar o al llenarse y vuelve a aparecer si alguien cancela | Equipo |
+| Botón «Salir» visible en la barra superior de todas las pantallas con sesión (antes sólo estaba al final de Ayuda) | Equipo |
+| Reserva por turnos de cursada: 08:00, 14:00 y 19:00 de lunes a viernes; 08:00 y 14:00 los sábados (la universidad cierra a las 18); domingos cerrado. Cada turno con su propio cupo de 15 lugares | Equipo |
+| Sin ocupación simulada: los lugares libres de cada turno dependen sólo de las reservas realizadas | Equipo |
+| Se mantiene la disponibilidad visible ("quedan N lugares") por ser parte del scope del MVP | Equipo |
+| No se agrega registro de usuarios: el scope define cuentas precargadas (seed) | Equipo |
+| Si no hay turnos para reservar en las próximas 24 h (ej. sábado a la noche), la pantalla de reserva indica cuál es el próximo turno y desde cuándo se puede reservar; si todos están completos, lo dice y aclara que pueden liberarse | IA |

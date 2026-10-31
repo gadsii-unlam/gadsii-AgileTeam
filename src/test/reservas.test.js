@@ -3,11 +3,11 @@ const assert = require('node:assert/strict');
 const { aEpoch, MIN } = require('../dominio/tiempo');
 const { una } = require('../db/db');
 const r = require('../dominio/reservas');
-const { urlDePrueba, baseDePrueba, crearUsuario, cfgSinSimulacion } = require('./utilidades');
+const { urlDePrueba, baseDePrueba, crearUsuario, cfgCon } = require('./utilidades');
 
 const LUNES_17 = aEpoch('2026-11-02', '17:00');
 const HORA_19 = aEpoch('2026-11-02', '19:00');
-const cfg = cfgSinSimulacion({ capacidad: 2 });
+const cfg = cfgCon({ capacidad: 2 });
 
 async function preparar() {
   const db = await baseDePrueba();
@@ -21,17 +21,18 @@ const activas = async (db) => Number((await una(db, "SELECT COUNT(*) AS n FROM r
 
 test('se puede tener una sola reserva activa', async () => {
   const { db, usuario } = await preparar();
-  await assert.rejects(r.crearReserva(db, usuario, '2026-11-02', '20:00', LUNES_17, cfg), /Ya tenés una reserva activa/);
+  await assert.rejects(r.crearReserva(db, usuario, '2026-11-03', '08:00', LUNES_17, cfg), /Ya tenés una reserva activa/);
 });
 
-test('no se puede reservar una franja llena ni una fuera de la ventana', async () => {
+test('no se puede reservar un turno lleno, un horario que no es turno ni uno fuera de la ventana', async () => {
   const { db } = await preparar();
   const otro = await crearUsuario(db, 'otro@alumno.unlam.edu.ar');
   const tercero = await crearUsuario(db, 'tercero@alumno.unlam.edu.ar');
   await r.crearReserva(db, otro, '2026-11-02', '19:00', LUNES_17, cfg);
   await assert.rejects(r.crearReserva(db, tercero, '2026-11-02', '19:00', LUNES_17, cfg), /ya no tiene lugares/);
-  await assert.rejects(r.crearReserva(db, tercero, '2026-11-02', '16:00', LUNES_17, cfg), r.ErrorReserva);
-  await assert.rejects(r.crearReserva(db, tercero, '2026-11-04', '19:00', LUNES_17, cfg), r.ErrorReserva);
+  await assert.rejects(r.crearReserva(db, tercero, '2026-11-02', '19:30', LUNES_17, cfg), /no está disponible/);
+  await assert.rejects(r.crearReserva(db, tercero, '2026-11-02', '14:00', LUNES_17, cfg), /no está disponible/);
+  await assert.rejects(r.crearReserva(db, tercero, '2026-11-04', '08:00', LUNES_17, cfg), /no está disponible/);
 });
 
 test('cancelar libera la reserva y permite reservar de nuevo', async () => {
@@ -108,7 +109,7 @@ async function usuarios(db, cantidad) {
 test('concurrencia: 30 personas por el último lugar -> sólo una lo consigue', async () => {
   const conexiones = await instancias(6);
   const ids = await usuarios(conexiones[0], 30);
-  const cfg1 = cfgSinSimulacion({ capacidad: 1 });
+  const cfg1 = cfgCon({ capacidad: 1 });
 
   const resultados = await Promise.allSettled(
     ids.map((id, i) => r.crearReserva(conexiones[i % conexiones.length], id, '2026-11-02', '19:00', LUNES_17, cfg1))
@@ -124,7 +125,7 @@ test('concurrencia: 30 personas por el último lugar -> sólo una lo consigue', 
 test('concurrencia: 60 personas por 15 lugares -> exactamente 15 reservas', async () => {
   const conexiones = await instancias(8);
   const ids = await usuarios(conexiones[0], 60);
-  const cfg15 = cfgSinSimulacion({ capacidad: 15 });
+  const cfg15 = cfgCon({ capacidad: 15 });
 
   const resultados = await Promise.allSettled(
     ids.map((id, i) => r.crearReserva(conexiones[i % conexiones.length], id, '2026-11-02', '19:00', LUNES_17, cfg15))
@@ -135,12 +136,12 @@ test('concurrencia: 60 personas por 15 lugares -> exactamente 15 reservas', asyn
 });
 
 test('concurrencia: doble toque del mismo usuario -> una sola reserva', async () => {
-  const conexiones = await instancias(4);
+  const conexiones = await instancias(3);
   const [id] = await usuarios(conexiones[0], 1);
-  const horas = ['19:00', '19:30', '20:00', '20:30'];
+  const turnos = [['2026-11-02', '19:00'], ['2026-11-03', '08:00'], ['2026-11-03', '14:00']];
 
   const resultados = await Promise.allSettled(
-    horas.map((hora, i) => r.crearReserva(conexiones[i], id, '2026-11-02', hora, LUNES_17, cfg))
+    turnos.map(([fecha, hora], i) => r.crearReserva(conexiones[i], id, fecha, hora, LUNES_17, cfg))
   );
 
   assert.equal(resultados.filter((x) => x.status === 'fulfilled').length, 1);

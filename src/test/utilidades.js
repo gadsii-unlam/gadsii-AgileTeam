@@ -28,9 +28,9 @@ async function crearUsuario(db, correo = 'prueba@alumno.unlam.edu.ar', password 
   return id;
 }
 
-// Configuración sin ocupación simulada, para que las cuentas sean exactas.
-const cfgSinSimulacion = (cambios = {}) => ({ ...config, ocupacionSimulada: false, ...cambios });
+// Configuración de prueba con cambios puntuales (ej. otra capacidad).
+const cfgCon = (cambios = {}) => ({ ...config, ...cambios });
 
 process.on('exit', () => fs.rmSync(carpeta, { recursive: true, force: true }));
 
-module.exports = { urlDePrueba, baseDePrueba, crearUsuario, cfgSinSimulacion };
+module.exports = { urlDePrueba, baseDePrueba, crearUsuario, cfgCon };

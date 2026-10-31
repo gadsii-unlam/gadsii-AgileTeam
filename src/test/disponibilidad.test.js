@@ -1,67 +1,77 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const config = require('../config');
 const { ejecutar } = require('../db/db');
 const { aEpoch, etiquetaFecha } = require('../dominio/tiempo');
-const { franjasEnVentana, ocupacionSimulada, disponibilidad, opcionesReserva } = require('../dominio/disponibilidad');
-const { baseDePrueba, crearUsuario, cfgSinSimulacion } = require('./utilidades');
+const { turnosDelDia, turnosEnVentana, proximoTurnoFueraDeVentana, disponibilidad, opcionesReserva } = require('../dominio/disponibilidad');
+const { baseDePrueba, crearUsuario, cfgCon } = require('./utilidades');
 
 // Lunes 2/11/2026 a las 17:00 (hora de Argentina)
 const LUNES_17 = aEpoch('2026-11-02', '17:00');
 
-test('la ventana arranca en la próxima franja con 15 min de anticipación y termina a las 24 h', () => {
-  const franjas = franjasEnVentana(LUNES_17);
-  assert.deepEqual(franjas[0], { fecha: '2026-11-02', hora: '17:30', inicioMs: aEpoch('2026-11-02', '17:30') });
-  assert.equal(franjas.at(-1).fecha, '2026-11-03');
-  assert.equal(franjas.at(-1).hora, '17:00');
-  // hoy 17:30..22:30 (11) + mañana 07:00..17:00 (21)
-  assert.equal(franjas.length, 32);
+const claves = (turnos) => turnos.map((t) => `${t.fecha} ${t.hora}`);
+
+test('turnos de cursada: 8, 14 y 19 de lunes a viernes; 8 y 14 los sábados; domingo cerrado', () => {
+  assert.deepEqual(turnosDelDia('2026-11-02'), ['08:00', '14:00', '19:00']); // lunes
+  assert.deepEqual(turnosDelDia('2026-11-06'), ['08:00', '14:00', '19:00']); // viernes
+  assert.deepEqual(turnosDelDia('2026-10-31'), ['08:00', '14:00']); // sábado
+  assert.deepEqual(turnosDelDia('2026-11-01'), []); // domingo
 });
 
-test('una franja que empieza en menos de 15 minutos no se ofrece', () => {
-  const franjas = franjasEnVentana(aEpoch('2026-11-02', '17:20'));
-  assert.equal(franjas[0].hora, '18:00');
+test('sólo se ofrecen los turnos que todavía no empezaron, dentro de las próximas 24 h', () => {
+  assert.deepEqual(claves(turnosEnVentana(LUNES_17)), ['2026-11-02 19:00', '2026-11-03 08:00', '2026-11-03 14:00']);
 });
 
-test('los domingos el estacionamiento está cerrado', () => {
-  // Sábado 31/10 a las 23:00: el domingo no se ofrece y el lunes queda fuera de las 24 h
-  assert.equal(franjasEnVentana(aEpoch('2026-10-31', '23:00')).length, 0);
-  const sabadoTarde = franjasEnVentana(aEpoch('2026-10-31', '20:00'));
-  assert.deepEqual([...new Set(sabadoTarde.map((f) => f.fecha))], ['2026-10-31']);
+test('un turno se ofrece hasta su hora de inicio y desaparece cuando empieza', () => {
+  const ofrece19 = (ms) => claves(turnosEnVentana(ms)).includes('2026-11-02 19:00');
+  assert.equal(ofrece19(aEpoch('2026-11-02', '18:46')), true);
+  assert.equal(ofrece19(aEpoch('2026-11-02', '18:59')), true);
+  assert.equal(ofrece19(aEpoch('2026-11-02', '19:00') + 1000), false);
 });
 
-test('la ocupación simulada es estable y nunca supera la capacidad', () => {
-  for (const f of franjasEnVentana(LUNES_17)) {
-    const ocupados = ocupacionSimulada(f.fecha, f.hora);
-    assert.equal(ocupados, ocupacionSimulada(f.fecha, f.hora));
-    assert.ok(ocupados >= 0 && ocupados <= config.capacidad);
-  }
-  assert.equal(ocupacionSimulada('2026-11-02', '19:00', cfgSinSimulacion()), 0);
+test('los sábados no hay turno de 19 y los domingos no se ofrece nada', () => {
+  // Viernes 30/10 a las 20:00: sábado 8 y 14 (no hay 19 el sábado)
+  assert.deepEqual(claves(turnosEnVentana(aEpoch('2026-10-30', '20:00'))), ['2026-10-31 08:00', '2026-10-31 14:00']);
+  // Sábado 31/10 a las 15:00: el domingo está cerrado y el lunes queda fuera de las 24 h
+  assert.deepEqual(turnosEnVentana(aEpoch('2026-10-31', '15:00')), []);
 });
 
-test('cada reserva activa resta un lugar en su franja; las canceladas no', async () => {
+test('si no hay turnos en las próximas 24 h, se sabe cuál es el próximo y desde cuándo se reserva', () => {
+  // Sábado 31/10 a las 19:00: el próximo es el lunes a las 8, reservable desde el domingo a las 8
+  const proximo = proximoTurnoFueraDeVentana(aEpoch('2026-10-31', '19:00'));
+  assert.equal(`${proximo.fecha} ${proximo.hora}`, '2026-11-02 08:00');
+  assert.equal(proximo.reservableDesdeMs, aEpoch('2026-11-01', '08:00'));
+});
+
+test('cada turno tiene su propio cupo de lugares; las canceladas no ocupan lugar', async () => {
   const db = await baseDePrueba();
   const usuario = await crearUsuario(db);
-  const cfg = cfgSinSimulacion({ capacidad: 3 });
-  const insertar = "INSERT INTO reservas (usuario_id, fecha, hora, estado, creada_en) VALUES (?, '2026-11-02', '19:00', ?, '')";
-  await ejecutar(db, insertar, [usuario, 'activa']);
-  await ejecutar(db, insertar, [usuario, 'cancelada']);
-  const franja = (await disponibilidad(db, LUNES_17, cfg)).find((f) => f.hora === '19:00' && f.fecha === '2026-11-02');
-  assert.equal(franja.libres, 2);
+  const insertar = "INSERT INTO reservas (usuario_id, fecha, hora, estado, creada_en) VALUES (?, ?, ?, ?, '')";
+  await ejecutar(db, insertar, [usuario, '2026-11-03', '08:00', 'activa']);
+  await ejecutar(db, insertar, [usuario, '2026-11-03', '08:00', 'activa']);
+  await ejecutar(db, insertar, [usuario, '2026-11-03', '08:00', 'cancelada']);
+  const libres = Object.fromEntries((await disponibilidad(db, LUNES_17)).map((t) => [`${t.fecha} ${t.hora}`, t.libres]));
+  assert.deepEqual(libres, { '2026-11-02 19:00': 15, '2026-11-03 08:00': 13, '2026-11-03 14:00': 15 });
 });
 
-test('las franjas llenas no aparecen en las opciones (H4)', async () => {
+test('los turnos llenos no aparecen en las opciones (H4) y vuelven si alguien cancela', async () => {
   const db = await baseDePrueba();
   const usuario = await crearUsuario(db);
-  const cfg = cfgSinSimulacion({ capacidad: 1 });
-  await ejecutar(db, "INSERT INTO reservas (usuario_id, fecha, hora, creada_en) VALUES (?, '2026-11-02', '19:00', '')", [usuario]);
-  const hoy = (await opcionesReserva(db, LUNES_17, cfg)).find((o) => o.fecha === '2026-11-02');
-  assert.equal(hoy.etiqueta, 'Hoy, lunes 2/11');
-  assert.ok(!hoy.horas.some((h) => h.hora === '19:00'));
-  assert.ok(hoy.horas.some((h) => h.hora === '19:30'));
+  const cfg = cfgCon({ capacidad: 1 });
+  const ofrece19 = async () =>
+    (await opcionesReserva(db, LUNES_17, cfg)).find((o) => o.fecha === '2026-11-02')?.horas.some((h) => h.hora === '19:00') ?? false;
+
+  assert.equal(await ofrece19(), true);
+  const { id } = await ejecutar(db, "INSERT INTO reservas (usuario_id, fecha, hora, creada_en) VALUES (?, '2026-11-02', '19:00', '')", [usuario]);
+  assert.equal(await ofrece19(), false);
+  const manana = (await opcionesReserva(db, LUNES_17, cfg)).find((o) => o.fecha === '2026-11-03');
+  assert.equal(manana.etiqueta, 'Mañana, martes 3/11');
+  assert.deepEqual(manana.horas, [{ hora: '08:00', libres: 1 }, { hora: '14:00', libres: 1 }]);
+
+  await ejecutar(db, "UPDATE reservas SET estado = 'cancelada' WHERE id = ?", [id]);
+  assert.equal(await ofrece19(), true);
 });
 
 test('etiquetas de fecha', () => {
-  assert.equal(etiquetaFecha('2026-11-03', LUNES_17), 'Mañana, martes 3/11');
+  assert.equal(etiquetaFecha('2026-11-02', LUNES_17), 'Hoy, lunes 2/11');
   assert.equal(etiquetaFecha('2026-11-05', LUNES_17), 'jueves 5/11');
 });

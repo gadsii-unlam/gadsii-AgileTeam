@@ -1,4 +1,4 @@
-// Al cambiar el día, muestra sólo las horas con lugares libres de ese día (H4).
+// Al cambiar el día, muestra sólo los turnos con lugares libres de ese día (H4).
 (function () {
   var datos = document.getElementById('datos-opciones');
   var fecha = document.getElementById('fecha');
@@ -13,7 +13,7 @@
   fecha.addEventListener('change', function () {
     var elegida = opciones.find(function (o) { return o.fecha === fecha.value; });
     hora.innerHTML = '';
-    var placeholder = new Option('Elegí una hora', '', true, true);
+    var placeholder = new Option('Elegí un turno', '', true, true);
     placeholder.disabled = true;
     hora.add(placeholder);
     (elegida ? elegida.horas : []).forEach(function (h) {

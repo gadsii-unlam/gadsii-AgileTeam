@@ -16,8 +16,15 @@
 <body>
   <header class="barra">
     <span class="marca">Unlam Parking</span>
-    <% if (typeof conAyuda === 'undefined' || conAyuda) { %>
-      <a class="boton-ayuda" href="/ayuda?desde=<%= encodeURIComponent(rutaActual) %>">Ayuda</a>
-    <% } %>
+    <div class="barra-acciones">
+      <% if (typeof conAyuda === 'undefined' || conAyuda) { %>
+        <a class="boton-ayuda" href="/ayuda?desde=<%= encodeURIComponent(rutaActual) %>">Ayuda</a>
+      <% } %>
+      <% if (typeof usuario !== 'undefined' && usuario) { %>
+        <form method="post" action="/salir" class="form-salir">
+          <button type="submit" class="boton-salir">Salir</button>
+        </form>
+      <% } %>
+    </div>
   </header>
   <main class="contenido">

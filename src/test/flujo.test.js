@@ -47,6 +47,7 @@ test('flujo completo del MVP', async (t) => {
   const login = await pedir('/login');
   assert.match(login.html, /Correo UNLaM/);
   assert.doesNotMatch(login.html, /class="boton-ayuda"/, 'el login no tiene botón de Ayuda');
+  assert.doesNotMatch(login.html, /class="boton-salir"/, 'sin sesión no hay botón Salir');
 
   // Credenciales incorrectas -> mensaje claro (H9)
   const fallido = await pedir('/login', { form: { correo: CORREO, password: 'mala' } });
@@ -62,6 +63,7 @@ test('flujo completo del MVP', async (t) => {
   assert.match(inicio.html, /No tenés una reserva activa/);
   assert.match(inicio.html, /Reservar estacionamiento/);
   assert.match(inicio.html, /class="boton-ayuda"/);
+  assert.match(inicio.html, /class="boton-salir"/, 'con sesión se ve el botón Salir');
 
   // Reservar: sólo horarios con lugares, con la cantidad que queda (H4)
   const reservar = await pedir('/reservar');
@@ -123,6 +125,17 @@ test('flujo completo del MVP', async (t) => {
 
   const tipos = (await db.execute('SELECT tipo FROM eventos ORDER BY id')).rows.map((e) => e.tipo);
   assert.deepEqual(tipos, ['login_fallido', 'login', 'reserva_creada', 'llegue', 'reserva_creada', 'reserva_cancelada', 'logout']);
+});
+
+test('un sábado a la noche se explica cuándo se puede reservar el próximo turno', async (t) => {
+  const { reloj, pedir, cerrar } = await levantar();
+  t.after(cerrar);
+  reloj.ahora = aEpoch('2026-10-31', '19:00');
+  await pedir('/login', { form: { correo: CORREO, password: CLAVE } });
+  const pagina = await pedir('/reservar');
+  assert.match(pagina.html, /Todavía no hay turnos para reservar/);
+  assert.match(pagina.html, /lunes 2\/11 a las 08:00 hs/);
+  assert.match(pagina.html, /mañana, domingo 1\/11 a las 08:00 hs/);
 });
 
 test('la sesión vence a los 5 días sin uso', async (t) => {

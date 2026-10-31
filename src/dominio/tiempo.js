@@ -25,10 +25,6 @@ function partesLocales(ms) {
   };
 }
 
-function minutosAHora(minutos) {
-  return `${dosDigitos(Math.floor(minutos / 60))}:${dosDigitos(minutos % 60)}`;
-}
-
 function sumarDias(fecha, dias) {
   return partesLocales(aEpoch(fecha, '12:00') + dias * 24 * 60 * MIN).fecha;
 }
@@ -48,4 +44,4 @@ function etiquetaFecha(fecha, ahoraMs) {
   return fechaLarga(fecha);
 }
 
-module.exports = { MIN, aEpoch, partesLocales, minutosAHora, sumarDias, fechaLarga, etiquetaFecha };
+module.exports = { MIN, aEpoch, partesLocales, sumarDias, fechaLarga, etiquetaFecha };

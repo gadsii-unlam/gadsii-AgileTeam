@@ -6,12 +6,14 @@
 //
 // Carga en la base configurada: el archivo local o, si hay TURSO_DATABASE_URL (en .env), la de Turso.
 // Si existe data/usuarios.json se usan esas cuentas; si no, las de CUENTAS_POR_DEFECTO.
-// Las contraseñas que no vengan en el archivo se generan al azar. Todas las contraseñas
-// nuevas se escriben en data/credenciales.txt (no se sube al repo) para entregarlas a mano.
+// Las contraseñas que no vengan en el archivo se generan al azar. Se guardan, para entregarlas
+// a mano, en data/credenciales-local.txt o data/credenciales-produccion.txt según la base
+// (no se suben al repo). Cada archivo tiene sólo las contraseñas vigentes de esa base.
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const bcrypt = require('bcryptjs');
+const config = require('../config');
 const { abrir, una, ejecutar } = require('../db/db');
 
 // Nombres ficticios: en el repo no hay datos personales reales.
@@ -34,6 +36,32 @@ function claveAlAzar() {
   return PALABRAS[crypto.randomInt(PALABRAS.length)] + String(crypto.randomInt(1000, 10000));
 }
 
+const ES_LOCAL = config.db.url.startsWith('file:');
+const ARCHIVO_CREDENCIALES = path.join(__dirname, '..', 'data', ES_LOCAL ? 'credenciales-local.txt' : 'credenciales-produccion.txt');
+
+// correo -> { etiqueta, clave }, con lo que ya estaba guardado para esta base.
+function leerCredenciales() {
+  const credenciales = new Map();
+  if (!fs.existsSync(ARCHIVO_CREDENCIALES)) return credenciales;
+  for (const linea of fs.readFileSync(ARCHIVO_CREDENCIALES, 'utf8').split('\n')) {
+    if (!linea.trim() || linea.startsWith('#')) continue;
+    const [etiqueta, correo, clave] = linea.split('\t');
+    credenciales.set(correo, { etiqueta, clave });
+  }
+  return credenciales;
+}
+
+function guardarCredenciales(credenciales) {
+  const base = ES_LOCAL ? 'LOCAL (data/parking.sqlite)' : 'PRODUCCIÓN (Turso, la que usa Netlify)';
+  const lineas = [
+    `# Contraseñas vigentes de la base ${base}`,
+    `# Actualizado: ${new Date().toISOString()}. No subir al repo ni compartir por canales públicos.`,
+    ...[...credenciales].map(([correo, { etiqueta, clave }]) => `${etiqueta}\t${correo}\t${clave}`),
+  ];
+  fs.mkdirSync(path.dirname(ARCHIVO_CREDENCIALES), { recursive: true });
+  fs.writeFileSync(ARCHIVO_CREDENCIALES, `${lineas.join('\n')}\n`);
+}
+
 function cargarCuentas() {
   const archivo = path.join(__dirname, '..', 'data', 'usuarios.json');
   if (!fs.existsSync(archivo)) return CUENTAS_POR_DEFECTO;
@@ -43,7 +71,8 @@ function cargarCuentas() {
 async function main() {
   const nuevasClaves = process.argv.includes('--nuevas-claves');
   const db = await abrir();
-  const credenciales = [];
+  const credenciales = leerCredenciales();
+  let cambios = 0;
 
   for (const cuenta of cargarCuentas()) {
     const correo = cuenta.correo.trim().toLowerCase();
@@ -64,15 +93,14 @@ async function main() {
         new Date().toISOString(),
       ]);
     }
-    credenciales.push(`${cuenta.etiqueta}\t${correo}\t${clave}`);
+    credenciales.set(correo, { etiqueta: cuenta.etiqueta, clave });
+    cambios++;
     console.log(`+ ${cuenta.etiqueta.padEnd(5)} ${correo}`);
   }
 
-  if (credenciales.length > 0) {
-    const archivo = path.join(__dirname, '..', 'data', 'credenciales.txt');
-    fs.mkdirSync(path.dirname(archivo), { recursive: true });
-    fs.appendFileSync(archivo, `# ${new Date().toISOString()}\n${credenciales.join('\n')}\n`);
-    console.log(`\nContraseñas nuevas guardadas en ${archivo} (no se sube al repo).`);
+  if (cambios > 0) {
+    guardarCredenciales(credenciales);
+    console.log(`\nContraseñas guardadas en ${ARCHIVO_CREDENCIALES} (no se sube al repo).`);
   }
   db.close();
 }

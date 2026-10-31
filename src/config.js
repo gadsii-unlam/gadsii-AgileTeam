@@ -9,9 +9,14 @@ function entero(nombre, porDefecto) {
   return n;
 }
 
-function horaAMinutos(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
+// Lista de horas "HH:MM" separadas por coma (ej. "08:00,14:00,19:00").
+function horas(nombre, porDefecto) {
+  const valor = process.env[nombre];
+  const lista = valor ? valor.split(',').map((h) => h.trim()) : porDefecto;
+  for (const h of lista) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(h)) throw new Error(`${nombre}: "${h}" no es una hora HH:MM válida`);
+  }
+  return lista;
 }
 
 module.exports = {
@@ -27,16 +32,19 @@ module.exports = {
   // Argentina no tiene horario de verano desde 2009: el offset es fijo.
   offsetUtc: '-03:00',
 
+  // Lugares por turno (cada turno tiene su propio cupo).
   capacidad: entero('CAPACIDAD', 15),
   toleranciaMin: entero('TOLERANCIA_MIN', 15),
-  franjaMin: entero('FRANJA_MIN', 30),
-  aperturaMin: horaAMinutos(process.env.HORA_APERTURA || '07:00'),
-  ultimaLlegadaMin: horaAMinutos(process.env.ULTIMA_LLEGADA || '22:30'),
-  anticipacionMin: entero('ANTICIPACION_MIN', 15),
+  // Turnos de llegada, según los horarios de cursada. Los sábados la universidad cierra a las 18
+  // y los domingos está cerrada.
+  turnos: {
+    semana: horas('TURNOS', ['08:00', '14:00', '19:00']),
+    sabado: horas('TURNOS_SABADO', ['08:00', '14:00']),
+  },
+  // Un turno se puede reservar hasta su hora de inicio (0 = sin anticipación mínima).
+  anticipacionMin: entero('ANTICIPACION_MIN', 0),
   ventanaHoras: 24,
-  diasCerrado: [0], // 0 = domingo
   llegueDesdeMin: entero('LLEGUE_DESDE_MIN', 60),
-  ocupacionSimulada: process.env.OCUPACION_SIMULADA !== '0',
 
   sesionDias: entero('SESION_DIAS', 5),
   intentosLoginMax: 8,

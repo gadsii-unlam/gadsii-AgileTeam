@@ -15,7 +15,7 @@
 const config = require('../config');
 const { una, todas, ejecutar } = require('../db/db');
 const { MIN, aEpoch, partesLocales } = require('./tiempo');
-const { franjasEnVentana, cupoReal } = require('./disponibilidad');
+const { turnosEnVentana } = require('./disponibilidad');
 const { registrarEvento } = require('./eventos');
 
 class ErrorReserva extends Error {}
@@ -23,7 +23,7 @@ class ErrorReserva extends Error {}
 // Modificador de SQLite para pasar fecha/hora de Argentina a UTC (ej. "+180 minutes").
 const [, signo, hh, mm] = config.offsetUtc.match(/([+-])(\d{2}):(\d{2})/);
 const A_UTC = `${signo === '-' ? '+' : '-'}${Number(hh) * 60 + Number(mm)} minutes`;
-// Segundos epoch del inicio de la franja de una reserva, calculado en SQL.
+// Segundos epoch del inicio del turno de una reserva, calculado en SQL.
 const INICIO_SQL = `unixepoch(fecha || ' ' || hora, '${A_UTC}')`;
 
 const segundos = (ms) => ms / 1000;
@@ -72,10 +72,10 @@ async function reservaActual(db, usuarioId, ahoraMs, cfg = config) {
 }
 
 async function crearReserva(db, usuarioId, fecha, hora, ahoraMs = Date.now(), cfg = config) {
-  if (!franjasEnVentana(ahoraMs, cfg).some((f) => f.fecha === fecha && f.hora === hora)) {
-    throw new ErrorReserva('Ese horario ya no está disponible. Elegí otro, por favor.');
+  if (!turnosEnVentana(ahoraMs, cfg).some((t) => t.fecha === fecha && t.hora === hora)) {
+    throw new ErrorReserva('Ese turno ya no está disponible. Elegí otro, por favor.');
   }
-  // Se inserta sólo si hay cupo en la franja y el usuario no tiene otra reserva pendiente.
+  // Se inserta sólo si hay cupo en el turno y el usuario no tiene otra reserva pendiente.
   const { cambios, id } = await ejecutar(
     db,
     `INSERT INTO reservas (usuario_id, fecha, hora, creada_en)
@@ -85,13 +85,13 @@ async function crearReserva(db, usuarioId, fecha, hora, ahoraMs = Date.now(), cf
          SELECT 1 FROM reservas
          WHERE usuario_id = ?1 AND estado = 'activa' AND llegada_registrada_en IS NULL
            AND ${INICIO_SQL} + ?6 >= ?7)`,
-    [usuarioId, fecha, hora, new Date(ahoraMs).toISOString(), cupoReal(fecha, hora, cfg), cfg.toleranciaMin * 60, segundos(ahoraMs)]
+    [usuarioId, fecha, hora, new Date(ahoraMs).toISOString(), cfg.capacidad, cfg.toleranciaMin * 60, segundos(ahoraMs)]
   );
   if (cambios === 0) {
     if (await reservaPendiente(db, usuarioId, ahoraMs, cfg)) {
       throw new ErrorReserva('Ya tenés una reserva activa. Para hacer otra, primero cancelá la que tenés.');
     }
-    throw new ErrorReserva('Ese horario ya no tiene lugares libres. Elegí otro, por favor.');
+    throw new ErrorReserva('Ese turno ya no tiene lugares libres. Elegí otro, por favor.');
   }
   await registrarEvento(db, usuarioId, 'reserva_creada', `${fecha} ${hora}`, ahoraMs);
   return id;

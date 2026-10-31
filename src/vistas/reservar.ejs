@@ -8,14 +8,19 @@
 
 <% if (opciones.length === 0) { %>
   <section class="estado">
-    <p class="estado-principal">No hay lugares libres en las próximas 24 horas</p>
-    <p>Volvé a intentar más tarde.</p>
+    <% if (sinOpciones.completos) { %>
+      <p class="estado-principal">Todos los turnos de las próximas 24 horas están completos</p>
+      <p>Si alguien cancela, el lugar vuelve a aparecer. Probá de nuevo más tarde.</p>
+    <% } else { %>
+      <p class="estado-principal">Todavía no hay turnos para reservar</p>
+      <p>Se puede reservar hasta 24 horas antes. El próximo turno es el <strong><%= sinOpciones.turno %></strong> y lo vas a poder reservar desde: <strong><%= sinOpciones.desde %></strong>.</p>
+    <% } %>
   </section>
   <div class="acciones">
     <a class="boton secundario" href="/">Volver</a>
   </div>
 <% } else { %>
-  <p class="ayuda-texto">Elegí el día y la hora en que vas a llegar. Sólo te mostramos horarios con lugares libres.</p>
+  <p class="ayuda-texto">Elegí el día y el turno en que vas a llegar. Sólo te mostramos turnos con lugares libres.</p>
 
   <form method="post" action="/reservas" class="formulario">
     <label for="fecha">Día</label>
@@ -25,9 +30,9 @@
       <% } %>
     </select>
 
-    <label for="hora">Hora de llegada</label>
+    <label for="hora">Turno</label>
     <select id="hora" name="hora" required>
-      <option value="" disabled <%= horaElegida ? '' : 'selected' %>>Elegí una hora</option>
+      <option value="" disabled <%= horaElegida ? '' : 'selected' %>>Elegí un turno</option>
       <% const elegida = opciones.find((o) => o.fecha === fechaElegida) || opciones[0]; %>
       <% for (const h of elegida.horas) { %>
         <option value="<%= h.hora %>" <%= h.hora === horaElegida ? 'selected' : '' %>>
@@ -35,7 +40,7 @@
         </option>
       <% } %>
     </select>
-    <p class="ayuda-texto">Tenés <%= toleranciaMin %> minutos de tolerancia desde la hora que elijas.</p>
+    <p class="ayuda-texto">Tenés <%= toleranciaMin %> minutos de tolerancia desde la hora del turno.</p>
 
     <div class="acciones">
       <button type="submit" class="boton primario">Realizar reserva</button>

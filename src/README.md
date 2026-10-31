@@ -3,7 +3,7 @@
 App web mobile-first para reservar un lugar en el estacionamiento de la UNLaM.
 Alcance del MVP (brief v3.1, TP3 + correcciones TP4B):
 
-- Reservar un lugar, cancelar la reserva y ver la disponibilidad por franja horaria.
+- Reservar un lugar por turno (8, 14 o 19 hs), cancelar la reserva y ver cuántos lugares quedan en cada turno.
 - Login con "cuenta universitaria" **simulada**: cuentas precargadas con el seed.
 - Botón **«Llegué»** para registrar la hora de llegada (reemplaza al QR, que quedó fuera del MVP).
 - Fecha y hora en desplegables que sólo muestran horarios con lugares libres (H4).
@@ -120,8 +120,9 @@ Crea estas cuentas (los nombres son ficticios, no hay datos personales en el rep
 | EQ1–EQ5 | `equipo1@alumno.unlam.edu.ar` … `equipo5@alumno.unlam.edu.ar` | Integrantes del equipo |
 | DEMO | `demo@unlam.edu.ar` | Demostraciones (formato docente) |
 
-Las **contraseñas** se generan al azar y quedan en **`src/data/credenciales.txt`**. Ese archivo
-**no se sube al repo**.
+Las **contraseñas** se generan al azar y quedan en **`src/data/credenciales-local.txt`** (para la base
+local) o **`src/data/credenciales-produccion.txt`** (para Turso, ver 5.2). Cada archivo tiene sólo las
+contraseñas vigentes de esa base y **no se sube al repo**.
 
 - Correr el seed de nuevo no borra nada: sólo crea las cuentas que falten.
 - Para regenerar las contraseñas: `npm run seed -- --nuevas-claves`.
@@ -177,7 +178,7 @@ En tu PC, dentro de `src/`:
    ```bash
    npm run seed
    ```
-   Las tablas se crean solas. Las contraseñas de producción quedan en `data/credenciales.txt`
+   Las tablas se crean solas. Las contraseñas de producción quedan en `data/credenciales-produccion.txt`
    **de tu PC**: son las que hay que entregarles a U1, U2 y U3 (en persona o por mensaje privado).
 3. Opcional: borrar el `.env` o renombrarlo, para que `npm start` vuelva a usar la base local.
    **No pruebes cosas contra la base de producción**: los datos de las sesiones están ahí.
@@ -226,7 +227,7 @@ URL del MVP: _completar después del primer deploy (ej. https://unlam-parking.ne
 | Al correr `npm` en PowerShell: *"la ejecución de scripts está deshabilitada"* | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
 | Error `bad option: --env-file-if-exists` | Tu Node es viejo: instalá la versión 22 o mayor (`node --version`). |
 | `EADDRINUSE` al hacer `npm start` | Ya hay otro `npm start` abierto: cerralo, o usá otro puerto (ver abajo). |
-| El login dice que el correo o la contraseña no son correctos | Las contraseñas locales y las de producción son distintas: usá las de `data/credenciales.txt` de la PC que corrió el seed contra esa base. |
+| El login dice que el correo o la contraseña no son correctos | Las contraseñas locales y las de producción son distintas: usá las de `data/credenciales-local.txt` o `data/credenciales-produccion.txt`, según la base, de la PC que corrió el seed. |
 | La app local se ve sin cuentas | Corré `npm run seed`. |
 | El sitio de Netlify muestra *"Algo salió mal"* | Revisá que `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN` estén bien cargadas en Netlify y redesplegá. El detalle del error está en Netlify → **Logs → Functions → app**. |
 | El deploy de Netlify falla | En el log del deploy: si fallaron los tests, corré `npm test` en tu PC y arreglalo antes de volver a subir. |
@@ -257,19 +258,19 @@ administración en el MVP.
 | Variable | Por defecto | Qué es |
 |---|---|---|
 | `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` | — (base local) | Base de Turso. Obligatorias en Netlify. |
-| `CAPACIDAD` | 15 | Lugares por franja de llegada |
+| `CAPACIDAD` | 15 | Lugares por turno (cada turno tiene su propio cupo) |
 | `TOLERANCIA_MIN` | 15 | Minutos de tolerancia después de la hora reservada |
-| `FRANJA_MIN` | 30 | Cada cuántos minutos hay una franja |
-| `HORA_APERTURA` / `ULTIMA_LLEGADA` | 07:00 / 22:30 | Primera y última franja del día (domingos cerrado) |
-| `ANTICIPACION_MIN` | 15 | Mínimo de anticipación para reservar |
+| `TURNOS` | 08:00,14:00,19:00 | Turnos de lunes a viernes |
+| `TURNOS_SABADO` | 08:00,14:00 | Turnos de los sábados (domingos cerrado) |
+| `ANTICIPACION_MIN` | 0 | Minutos de anticipación mínima para reservar (0 = se puede reservar hasta la hora de inicio) |
 | `LLEGUE_DESDE_MIN` | 60 | Desde cuántos minutos antes se habilita «Llegué» |
-| `OCUPACION_SIMULADA` | 1 | Suma ocupación ficticia de "otros usuarios" (`0` para desactivarla) |
 | `SESION_DIAS` | 5 | Días que dura la sesión sin usar la app |
 | `PORT` / `HOST` | 3000 / 127.0.0.1 | Dónde escucha el servidor local |
 
-Cómo se calcula la disponibilidad: cada franja tiene `CAPACIDAD` lugares; los ocupan las reservas
-activas de esa franja (llegue o no la persona: no hay liberación por vencimiento) más la ocupación
-simulada. La lógica está en `dominio/disponibilidad.js`.
+Cómo se calcula la disponibilidad: cada turno tiene `CAPACIDAD` lugares, que ocupan sólo las reservas
+activas de ese turno (llegue o no la persona: no hay liberación por vencimiento). Un turno se puede
+reservar hasta su hora de inicio y dentro de las próximas 24 h; desaparece al empezar o al llenarse,
+y vuelve a aparecer si alguien cancela. La lógica está en `dominio/disponibilidad.js`.
 
 ### Concurrencia
 

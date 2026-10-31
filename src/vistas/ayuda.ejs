@@ -6,7 +6,7 @@
   <h2>Cómo reservar un lugar</h2>
   <ol>
     <li>En Inicio, tocá <strong>«Reservar estacionamiento»</strong>.</li>
-    <li>Elegí el día y la hora en que vas a llegar. Sólo aparecen los horarios con lugares libres, y al lado de cada hora ves cuántos lugares quedan.</li>
+    <li>Elegí el día y el turno en que vas a llegar: 8, 14 o 19 hs (los sábados, 8 o 14 hs). Sólo aparecen los turnos con lugares libres, y al lado de cada uno ves cuántos lugares quedan.</li>
     <li>Tocá <strong>«Realizar reserva»</strong>. Vas a ver el mensaje «Reserva confirmada».</li>
   </ol>
   <p>Podés reservar para las próximas 24 horas y tener una sola reserva activa a la vez.</p>
@@ -24,15 +24,13 @@
     <li>Tocá <strong>«Cancelar reserva»</strong> y después <strong>«Sí, cancelar»</strong>.</li>
   </ol>
   <p>El lugar queda libre para otra persona. Después podés hacer una reserva nueva.</p>
+
+  <h2>Cómo salir o entrar con otra cuenta</h2>
+  <p>Tocá <strong>«Salir»</strong>, arriba a la derecha. Después podés volver a ingresar con tu correo o con otra cuenta.</p>
 </section>
 
 <div class="acciones">
   <a class="boton primario" href="<%= volver %>">Volver</a>
-  <% if (usuario) { %>
-    <form method="post" action="/salir">
-      <button type="submit" class="boton enlace">Cerrar sesión</button>
-    </form>
-  <% } %>
 </div>
 
 <%- include('partes/abajo') %>
