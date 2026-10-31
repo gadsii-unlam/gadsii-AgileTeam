@@ -2,24 +2,20 @@
 
 | | |
 |---|---|
-| **Versión** | 3.1 |
-| **Fecha** | 08/09/2026 |
+| **Versión** | 5.0 |
+| **Fecha** | 31/10/2026 |
 | **Equipo** | Agile Team |
 | **Materia** | Gestión Aplicada al Desarrollo de Software II (3665) |
 | **Cátedra** | Departamento de Ingeniería e Investigaciones Tecnológicas — Ingeniería Informática, UNLaM |
-| **Origen** | TP 3 - Scope del MVP y Diseño de la Interacción |
+| **Origen** | TP 5 - MVP |
 
 ---
 
 ## Cambios respecto de la versión anterior
 
-Esta versión incorpora las decisiones tomadas en la Parte 1 del TP3 ("Qué construir"). Los cambios principales son:
+Esta versión incorpora las métricas que serán evaluadas en el MVP. Los cambios principales son:
 
-- Se define el **scope del MVP**: qué funcionalidades quedan incluidas y cuáles quedan excluidas, justificando cada decisión en función de si ayuda o no a confirmar/refutar la hipótesis de valor del TP2.
-- Se aclara, para cada elemento incluido en el MVP, **qué se construye realmente** y **qué se simula o se resuelve a mano** en esta primera versión.
-- Se describe el **flujo principal** que va a recorrer el usuario dentro del scope definido, desde que abre la aplicación hasta que obtiene el valor prometido por la hipótesis.
-- Se seleccionan y fundamentan los **atributos de usabilidad priorizados** para el usuario primario, en base a los hallazgos del relevamiento del TP2.
-
+- Se definen dos métricas accionables y una vanidosa, y el criterio en base al que se decidirá si se persevera o prospera.
 ---
 
 ## 1. Segmento
@@ -219,3 +215,28 @@ Los atributos más relevantes para el usuario de Unlam Parking son:
 **Facilidad de aprendizaje.** Se busca que estacionar el vehículo sea lo más simple posible, para reducir el estrés que le genera al usuario esta acción. Si la app fuera caótica y difícil de aprender a usar, el usuario la descartaría rápidamente y preferiría seguir buscando lugar como hasta ahora.
 
 **Recuerdo en el tiempo.** Es relevante porque el usuario probablemente no use la app todos los días, ya que no todos necesitan ir a la universidad de lunes a viernes. Por eso es importante que, aunque pasen dos semanas desde el último uso, pueda recordar fácilmente cómo usarla para que siga siendo su opción cada vez que tenga que estacionar.
+
+* * *
+
+* * *
+
+## 13. Métricas y criterio de éxito
+
+Para testear la hipótesis de valor con el prototipo del MVP se definieron dos métricas accionables y una métrica vanidosa. La primera se vincula con el criterio de la sección 6, y la segunda con el atributo de usabilidad priorizado en la sección 12.
+
+### Métricas accionables
+
+| Métrica                                         | Qué mide                                                                                       | Cómo se mide                                                                                                      | Se vincula con                              |
+|-------------------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| **Tiempo que tarda en encontrar estacionamiento** | Cuánto demora el usuario en estacionar una vez que llega al predio.                            | Tiempo transcurrido desde que el usuario llega a la Universidad hasta que estaciona el vehículo en el estacionamiento de la UNLaM. | Hipótesis de valor (sección 6)              |
+| **Tareas resueltas sin ayuda**                  | Si el usuario puede generar una reserva y cancelarla por sí mismo.                             | Cantidad de preguntas que realiza el usuario al generar una reserva y al cancelarla.                              | Facilidad de aprendizaje (sección 12)       |
+
+### Métrica vanidosa
+
+| Métrica                              | Por qué es vanidosa                                                                                         |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| **Grado de agradabilidad en el uso** | Es una opinión subjetiva que no permite decidir si la hipótesis se sostiene ni qué corregir en el producto. |
+
+### Criterio de éxito
+
+> La hipótesis se sostiene en caso de que los tres usuarios logren realizar una reserva sin necesidad de solicitar ayuda.
