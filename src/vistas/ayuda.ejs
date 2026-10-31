@@ -1,0 +1,38 @@
+<%- include('partes/arriba', { titulo: 'Ayuda', conAyuda: false }) %>
+
+<h1>Ayuda</h1>
+
+<section class="ayuda">
+  <h2>Cómo reservar un lugar</h2>
+  <ol>
+    <li>En Inicio, tocá <strong>«Reservar estacionamiento»</strong>.</li>
+    <li>Elegí el día y la hora en que vas a llegar. Sólo aparecen los horarios con lugares libres, y al lado de cada hora ves cuántos lugares quedan.</li>
+    <li>Tocá <strong>«Realizar reserva»</strong>. Vas a ver el mensaje «Reserva confirmada».</li>
+  </ol>
+  <p>Podés reservar para las próximas 24 horas y tener una sola reserva activa a la vez.</p>
+
+  <h2>Cómo ver tu reserva</h2>
+  <p>En Inicio vas a ver si tenés una reserva. Tocá <strong>«Ver mi reserva»</strong> para ver el día, la hora y hasta qué hora podés llegar (tenés <%= toleranciaMin %> minutos de tolerancia).</p>
+
+  <h2>Cómo registrar tu llegada</h2>
+  <p>Cuando llegues a la universidad, entrá a <strong>«Ver mi reserva»</strong> y tocá <strong>«Llegué»</strong>. Así queda registrado que llegaste a tiempo.</p>
+  <p>Si no lo tocás antes de que termine la tolerancia, la app te va a avisar que no registraste tu llegada a tiempo.</p>
+
+  <h2>Cómo cancelar una reserva</h2>
+  <ol>
+    <li>Entrá a <strong>«Ver mi reserva»</strong>.</li>
+    <li>Tocá <strong>«Cancelar reserva»</strong> y después <strong>«Sí, cancelar»</strong>.</li>
+  </ol>
+  <p>El lugar queda libre para otra persona. Después podés hacer una reserva nueva.</p>
+</section>
+
+<div class="acciones">
+  <a class="boton primario" href="<%= volver %>">Volver</a>
+  <% if (usuario) { %>
+    <form method="post" action="/salir">
+      <button type="submit" class="boton enlace">Cerrar sesión</button>
+    </form>
+  <% } %>
+</div>
+
+<%- include('partes/abajo') %>

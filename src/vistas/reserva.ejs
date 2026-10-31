@@ -1,0 +1,36 @@
+<%- include('partes/arriba', { titulo: nueva ? 'Reserva confirmada' : 'Mi reserva' }) %>
+
+<% if (nueva) { %>
+  <h1 class="confirmada">✓ Reserva confirmada</h1>
+<% } else { %>
+  <h1>Tu reserva</h1>
+<% } %>
+
+<section class="estado con-reserva">
+  <dl class="datos">
+    <dt>Día</dt><dd><%= reserva.fechaTexto %></dd>
+    <dt>Hora de llegada</dt><dd><%= reserva.hora %> hs</dd>
+    <dt>Tolerancia</dt><dd><%= toleranciaMin %> minutos (hasta las <%= reserva.limite %> hs)</dd>
+  </dl>
+  <%- include('partes/estado-llegada', { reserva }) %>
+</section>
+
+<div class="acciones">
+  <% if (reserva.puedeLlegue) { %>
+    <form method="post" action="/reserva/llegue">
+      <input type="hidden" name="reserva" value="<%= reserva.id %>">
+      <button type="submit" class="boton primario">Llegué</button>
+    </form>
+  <% } else if (reserva.estado === 'pendiente') { %>
+    <button type="button" class="boton primario" disabled>Llegué</button>
+    <p class="ayuda-texto">Vas a poder tocar «Llegué» desde las <%= reserva.llegueDesde %> hs del día de tu reserva.</p>
+  <% } %>
+
+  <a class="boton secundario" href="/">Continuar</a>
+
+  <% if (reserva.puedeCancelar) { %>
+    <a class="boton peligro" href="/reserva/cancelar">Cancelar reserva</a>
+  <% } %>
+</div>
+
+<%- include('partes/abajo') %>

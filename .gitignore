@@ -24,3 +24,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# MVP Unlam Parking: base de datos, credenciales y backups (no se suben)
+src/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
