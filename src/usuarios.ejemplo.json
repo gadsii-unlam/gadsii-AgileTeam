@@ -1,0 +1,5 @@
+[
+  { "etiqueta": "U1", "correo": "lgomez@alumno.unlam.edu.ar" },
+  { "etiqueta": "U2", "correo": "mfernandez@alumno.unlam.edu.ar", "password": "elegida-por-el-equipo" },
+  { "etiqueta": "DEMO", "correo": "demo@unlam.edu.ar" }
+]

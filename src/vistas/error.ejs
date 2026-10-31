@@ -1,0 +1,10 @@
+<%- include('partes/arriba', { titulo }) %>
+
+<h1><%= titulo %></h1>
+<% if (mensaje) { %><p><%= mensaje %></p><% } %>
+
+<div class="acciones">
+  <a class="boton primario" href="/">Ir al inicio</a>
+</div>
+
+<%- include('partes/abajo') %>

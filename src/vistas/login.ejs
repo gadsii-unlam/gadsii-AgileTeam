@@ -1,0 +1,28 @@
+<%- include('partes/arriba', { titulo: 'Ingresar', conAyuda: false }) %>
+
+<h1>Ingresá con tu cuenta de la UNLaM</h1>
+<p class="ayuda-texto">Usá tu correo y contraseña de la universidad.</p>
+
+<% if (error) { %>
+  <div class="mensaje error" role="alert"><%= error %></div>
+<% } %>
+
+<form method="post" action="/login" class="formulario">
+  <label for="correo">Correo UNLaM</label>
+  <input id="correo" name="correo" type="email" inputmode="email" autocomplete="username"
+         autocapitalize="none" spellcheck="false" placeholder="jperez@alumno.unlam.edu.ar"
+         value="<%= correo %>" required>
+
+  <label for="password">Contraseña</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" required>
+  <label class="check">
+    <input type="checkbox" id="mostrar-password"> Mostrar contraseña
+  </label>
+
+  <div class="acciones">
+    <button type="submit" class="boton primario">Ingresar</button>
+  </div>
+</form>
+
+<script src="/js/login.js" defer></script>
+<%- include('partes/abajo') %>

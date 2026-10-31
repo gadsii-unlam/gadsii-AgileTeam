@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= titulo %> · Unlam Parking</title>
+  <meta name="theme-color" content="#0b5d3b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/iconos/icono-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/iconos/icono-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Unlam Parking">
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/js/registrar-sw.js" defer></script>
+</head>
+<body>
+  <header class="barra">
+    <span class="marca">Unlam Parking</span>
+    <div class="barra-acciones">
+      <% if (typeof conAyuda === 'undefined' || conAyuda) { %>
+        <a class="boton-ayuda" href="/ayuda?desde=<%= encodeURIComponent(rutaActual) %>">Ayuda</a>
+      <% } %>
+      <% if (typeof usuario !== 'undefined' && usuario) { %>
+        <form method="post" action="/salir" class="form-salir">
+          <button type="submit" class="boton-salir">Salir</button>
+        </form>
+      <% } %>
+    </div>
+  </header>
+  <main class="contenido">

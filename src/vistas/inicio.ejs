@@ -1,0 +1,37 @@
+<%- include('partes/arriba', { titulo: 'Inicio' }) %>
+
+<% if (aviso) { %>
+  <div class="mensaje exito" role="status"><%= aviso %></div>
+<% } %>
+
+<% if (reserva && reserva.estado === 'pendiente') { %>
+  <section class="estado con-reserva">
+    <p class="estado-etiqueta">Tenés una reserva</p>
+    <p class="estado-principal"><%= reserva.fechaTexto %></p>
+    <p class="estado-principal">Llegada: <%= reserva.hora %> hs</p>
+    <p>Tenés tiempo de llegar hasta las <%= reserva.limite %> hs.</p>
+  </section>
+  <div class="acciones">
+    <a class="boton primario" href="/reserva">Ver mi reserva</a>
+  </div>
+<% } else { %>
+  <section class="estado">
+    <p class="estado-etiqueta">Estado</p>
+    <p class="estado-principal">No tenés una reserva activa</p>
+    <p>Reservá tu lugar antes de salir y llegá sin buscar dónde estacionar.</p>
+  </section>
+
+  <% if (reserva) { %>
+    <section class="estado secundario">
+      <p class="estado-etiqueta">Tu reserva de hoy a las <%= reserva.hora %> hs</p>
+      <%- include('partes/estado-llegada', { reserva }) %>
+      <a href="/reserva">Ver esa reserva</a>
+    </section>
+  <% } %>
+
+  <div class="acciones">
+    <a class="boton primario" href="/reservar">Reservar estacionamiento</a>
+  </div>
+<% } %>
+
+<%- include('partes/abajo') %>

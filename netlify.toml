@@ -1,0 +1,22 @@
+# Configuración de Netlify. Se usa tanto con "netlify deploy" desde la raíz del repo como con un
+# repo conectado. Todas las rutas son desde la raíz del repo (sin "base", para que la CLI y el
+# build en la nube las resuelvan igual).
+
+[build]
+  publish = "src/public"
+  # Instala las dependencias de src/ y corre los tests: si alguno falla, no se publica.
+  command = "npm ci --prefix src && npm test --prefix src"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "src/netlify/functions"
+  # Plantillas y esquema se leen del disco en tiempo de ejecución: hay que incluirlos.
+  included_files = ["src/vistas/**", "src/db/schema.sql"]
+
+# Todo lo que no sea un archivo de src/public/ lo atiende la app.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/app/:splat"
+  status = 200
