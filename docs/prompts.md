@@ -16,6 +16,9 @@
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Resolver el error 1033 de Cloudflare al entrar a la URL pública | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Cómo entrar a la base de datos y ejecutar consultas | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Documentar en el README todos los comandos e instalaciones necesarios (Windows y Linux) para que cualquier integrante pueda correr la app y abrir el link público o de desarrollo; proponer un mensaje de commit | TP 5 |
+|31/10/2026| Claude Opus 5.5 (Claude Code) | Comparar publicar desde la PC con Cloudflare contra Netlify; qué implica que la base deje de ser un archivo local | TP 5 |
+|31/10/2026| Claude Opus 5.5 (Claude Code) | Cómo agregar al resto del equipo como coautores del commit | TP 5 |
+|31/10/2026| Claude Opus 5.5 (Claude Code) | Migrar el despliegue a Netlify (URL única, sin depender de una PC encendida) y revisar si la app soporta que muchos usuarios reserven al mismo tiempo | TP 5 |
 
 ## Decisiones del MVP (TP5)
 
@@ -29,7 +32,7 @@
 | Sesión recordada 5 días sin uso (aprox. un login por semana) | Equipo |
 | Usuario = correo UNLaM (`inicialApellido@alumno.unlam.edu.ar` / `@unlam.edu.ar` para docentes) | Equipo |
 | Ocupación compartida entre todos los usuarios, visible por franja | Equipo |
-| Hosting: PC de un integrante + Cloudflare quick tunnel (la URL cambia en cada publicación) | Equipo |
+| ~~Hosting: PC de un integrante + Cloudflare quick tunnel (la URL cambia en cada publicación)~~ Reemplazado por Netlify (ver abajo) | Equipo |
 | Contradicciones entre `docs/` y el prompt: gana la alternativa B sobre el flujo del brief §11, sin pantalla de administración, login validado con mensaje de error (H9), botón "Continuar", sólo correcciones H4/H9/H10 | Propuesto por la IA, aprobado por el equipo |
 | Capacidad de 15 lugares por franja de llegada, franjas independientes; ocupación simulada de "otros usuarios" | Propuesto por la IA, aprobado por el equipo |
 | Tolerancia de 15 minutos; franjas cada 30 min; reservas desde 15 min hasta 24 h hacia adelante; horario 07:00–22:30; domingos cerrado | Propuesto por la IA, aprobado por el equipo |
@@ -37,11 +40,17 @@
 | Log interno de eventos (login, login fallido, reserva creada/cancelada, "Llegué", cierre de sesión) exportable a CSV | Propuesto por la IA, aprobado por el equipo |
 | Contraseñas con hash bcrypt en la base; cookie de sesión HttpOnly con el hash del token guardado en la base | Propuesto por la IA, aprobado por el equipo |
 | Express 5 como framework web y pantallas renderizadas en el servidor con plantillas EJS (sin framework de front ni build) | IA |
-| Módulo `node:sqlite` incluido en Node (en lugar de `better-sqlite3`), para no compilar módulos nativos | IA |
+| ~~Módulo `node:sqlite` incluido en Node (en lugar de `better-sqlite3`), para no compilar módulos nativos~~ Reemplazado por `@libsql/client` al migrar a Netlify | IA |
 | Organización de `src/`: `dominio/` (lógica propia), `vistas/`, `public/`, `db/`, `scripts/`, `test/`; datos en `src/data/` fuera del repo | IA |
 | Contraseñas del seed generadas al azar y guardadas en `src/data/credenciales.txt` (fuera del repo); nombres de cuentas ficticios | IA |
-| Script `npm run publicar` que hace backup, levanta servidor y túnel y guarda la URL; servidor escuchando sólo en 127.0.0.1 | IA |
+| ~~Script `npm run publicar` que hace backup, levanta servidor y túnel y guarda la URL~~ Eliminado al migrar a Netlify; el servidor local escucha sólo en 127.0.0.1 | IA |
 | Límite de intentos de login, cabeceras de seguridad (CSP) y service worker que no guarda datos de reservas | IA |
 | Tests con `node:test` (lógica de disponibilidad/reservas y recorrido completo por HTTP) | IA |
-| QR con la URL pública en la terminal y en `data/url-publica.png` al publicar, con la librería `qrcode` (herramienta del equipo para compartir el link; la app no muestra QR) | Propuesto por la IA, aprobado por el equipo |
-| Script de publicación escrito en Node (no en bash) para que funcione igual en Windows y Linux; verifica que el puerto esté libre, carga las cuentas si faltan y avisa si se cae el servidor o el túnel | IA |
+| QR con la URL pública en `data/url-publica.png`, con la librería `qrcode` (herramienta del equipo para compartir el link; la app no muestra QR). Desde la migración a Netlify se genera con `npm run qr -- <url>` | Propuesto por la IA, aprobado por el equipo |
+| ~~Script de publicación escrito en Node (no en bash) para que funcione igual en Windows y Linux~~ Eliminado al migrar a Netlify | IA |
+| Despliegue en Netlify: URL fija y disponible sin depender de una PC encendida | Equipo |
+| Base de datos de producción en Turso (SQLite/libSQL en la nube) para mantener SQLite como persistencia; en desarrollo y tests, archivo SQLite local con el mismo cliente (`@libsql/client`) | IA |
+| La app Express corre como una única función de Netlify (`serverless-http`); los archivos estáticos los sirve el CDN de Netlify; `netlify.toml` en la raíz con `base = "src"` y `npm test` como paso de build | IA |
+| Concurrencia: cada escritura (reservar, cancelar, «Llegué») es una sola sentencia SQL atómica con sus condiciones (cupo, reserva pendiente, estado), en lugar de "verificar y después guardar"; tests con reservas simultáneas desde varias conexiones | IA |
+| Límite de intentos de login y sesiones guardados en la base (no en memoria), porque en Netlify cada pedido puede atenderlo una instancia distinta | IA |
+| Backup como exportación JSON de todas las tablas (funciona con la base local y con Turso) | IA |

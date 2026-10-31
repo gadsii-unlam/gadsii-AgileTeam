@@ -1,0 +1,21 @@
+# Configuración de Netlify (se lee sola al conectar el repo; no hace falta tocar nada en el panel).
+# Todas las rutas de abajo son relativas a "base" (la carpeta src/).
+
+[build]
+  base = "src"
+  publish = "public"
+  command = "npm test"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  # Plantillas y esquema se leen del disco en tiempo de ejecución: hay que incluirlos.
+  included_files = ["vistas/**", "db/schema.sql"]
+
+# Todo lo que no sea un archivo de public/ lo atiende la app.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/app/:splat"
+  status = 200

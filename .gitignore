@@ -30,3 +30,6 @@ src/data/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+
+# Netlify CLI
+.netlify/

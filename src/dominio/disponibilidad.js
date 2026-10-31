@@ -8,6 +8,7 @@
 // - Opcionalmente se suma una ocupación simulada de "otros usuarios" para que el estacionamiento
 //   se vea como uno real y no vacío.
 const config = require('../config');
+const { todas } = require('../db/db');
 const { MIN, aEpoch, partesLocales, minutosAHora, sumarDias, etiquetaFecha } = require('./tiempo');
 
 function franjasEnVentana(ahoraMs, cfg = config) {
@@ -47,32 +48,37 @@ function ocupacionSimulada(fecha, hora, cfg = config) {
   return Math.round(cfg.capacidad * pct);
 }
 
-function ocupacionReal(db, fechas) {
-  const filas = db
-    .prepare(
-      `SELECT fecha, hora, COUNT(*) AS cantidad FROM reservas
-       WHERE estado = 'activa' AND fecha IN (${fechas.map(() => '?').join(',')})
-       GROUP BY fecha, hora`
-    )
-    .all(...fechas);
-  return new Map(filas.map((f) => [`${f.fecha} ${f.hora}`, f.cantidad]));
+// Lugares que quedan para reservas reales en una franja, descontada la ocupación simulada.
+function cupoReal(fecha, hora, cfg = config) {
+  return Math.max(0, cfg.capacidad - ocupacionSimulada(fecha, hora, cfg));
+}
+
+async function ocupacionReal(db, fechas) {
+  const filas = await todas(
+    db,
+    `SELECT fecha, hora, COUNT(*) AS cantidad FROM reservas
+     WHERE estado = 'activa' AND fecha IN (${fechas.map(() => '?').join(',')})
+     GROUP BY fecha, hora`,
+    fechas
+  );
+  return new Map(filas.map((f) => [`${f.fecha} ${f.hora}`, Number(f.cantidad)]));
 }
 
 // Todas las franjas de la ventana, incluidas las llenas.
-function disponibilidad(db, ahoraMs, cfg = config) {
+async function disponibilidad(db, ahoraMs, cfg = config) {
   const franjas = franjasEnVentana(ahoraMs, cfg);
   if (franjas.length === 0) return [];
-  const reales = ocupacionReal(db, [...new Set(franjas.map((f) => f.fecha))]);
+  const reales = await ocupacionReal(db, [...new Set(franjas.map((f) => f.fecha))]);
   return franjas.map((f) => {
-    const ocupados = ocupacionSimulada(f.fecha, f.hora, cfg) + (reales.get(`${f.fecha} ${f.hora}`) || 0);
-    return { ...f, libres: Math.max(0, cfg.capacidad - ocupados) };
+    const libres = cupoReal(f.fecha, f.hora, cfg) - (reales.get(`${f.fecha} ${f.hora}`) || 0);
+    return { ...f, libres: Math.max(0, libres) };
   });
 }
 
 // Sólo lo que se puede elegir (H4): fechas con al menos una hora libre y horas con lugares libres.
-function opcionesReserva(db, ahoraMs, cfg = config) {
+async function opcionesReserva(db, ahoraMs, cfg = config) {
   const porFecha = new Map();
-  for (const f of disponibilidad(db, ahoraMs, cfg)) {
+  for (const f of await disponibilidad(db, ahoraMs, cfg)) {
     if (f.libres === 0) continue;
     if (!porFecha.has(f.fecha)) {
       porFecha.set(f.fecha, { fecha: f.fecha, etiqueta: etiquetaFecha(f.fecha, ahoraMs), horas: [] });
@@ -82,4 +88,4 @@ function opcionesReserva(db, ahoraMs, cfg = config) {
   return [...porFecha.values()];
 }
 
-module.exports = { franjasEnVentana, ocupacionSimulada, disponibilidad, opcionesReserva };
+module.exports = { franjasEnVentana, ocupacionSimulada, cupoReal, disponibilidad, opcionesReserva };

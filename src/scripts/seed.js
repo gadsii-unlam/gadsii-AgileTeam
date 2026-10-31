@@ -4,6 +4,7 @@
 //   npm run seed                      -> crea las cuentas que falten
 //   npm run seed -- --nuevas-claves   -> además regenera la contraseña de las que ya existen
 //
+// Carga en la base configurada: el archivo local o, si hay TURSO_DATABASE_URL (en .env), la de Turso.
 // Si existe data/usuarios.json se usan esas cuentas; si no, las de CUENTAS_POR_DEFECTO.
 // Las contraseñas que no vengan en el archivo se generan al azar. Todas las contraseñas
 // nuevas se escriben en data/credenciales.txt (no se sube al repo) para entregarlas a mano.
@@ -11,7 +12,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const bcrypt = require('bcryptjs');
-const { abrir } = require('../db/db');
+const { abrir, una, ejecutar } = require('../db/db');
 
 // Nombres ficticios: en el repo no hay datos personales reales.
 const CUENTAS_POR_DEFECTO = [
@@ -39,14 +40,14 @@ function cargarCuentas() {
   return JSON.parse(fs.readFileSync(archivo, 'utf8'));
 }
 
-function main() {
+async function main() {
   const nuevasClaves = process.argv.includes('--nuevas-claves');
-  const db = abrir();
+  const db = await abrir();
   const credenciales = [];
 
   for (const cuenta of cargarCuentas()) {
     const correo = cuenta.correo.trim().toLowerCase();
-    const existente = db.prepare('SELECT id FROM usuarios WHERE correo = ?').get(correo);
+    const existente = await una(db, 'SELECT id FROM usuarios WHERE correo = ?', [correo]);
     if (existente && !nuevasClaves) {
       console.log(`= ${cuenta.etiqueta.padEnd(5)} ${correo} (ya existía, sin cambios)`);
       continue;
@@ -54,14 +55,14 @@ function main() {
     const clave = cuenta.password || claveAlAzar();
     const hash = bcrypt.hashSync(clave, 10);
     if (existente) {
-      db.prepare('UPDATE usuarios SET password_hash = ?, etiqueta = ? WHERE id = ?').run(hash, cuenta.etiqueta, existente.id);
+      await ejecutar(db, 'UPDATE usuarios SET password_hash = ?, etiqueta = ? WHERE id = ?', [hash, cuenta.etiqueta, existente.id]);
     } else {
-      db.prepare('INSERT INTO usuarios (correo, password_hash, etiqueta, creado_en) VALUES (?, ?, ?, ?)').run(
+      await ejecutar(db, 'INSERT INTO usuarios (correo, password_hash, etiqueta, creado_en) VALUES (?, ?, ?, ?)', [
         correo,
         hash,
         cuenta.etiqueta,
-        new Date().toISOString()
-      );
+        new Date().toISOString(),
+      ]);
     }
     credenciales.push(`${cuenta.etiqueta}\t${correo}\t${clave}`);
     console.log(`+ ${cuenta.etiqueta.padEnd(5)} ${correo}`);
@@ -69,6 +70,7 @@ function main() {
 
   if (credenciales.length > 0) {
     const archivo = path.join(__dirname, '..', 'data', 'credenciales.txt');
+    fs.mkdirSync(path.dirname(archivo), { recursive: true });
     fs.appendFileSync(archivo, `# ${new Date().toISOString()}\n${credenciales.join('\n')}\n`);
     console.log(`\nContraseñas nuevas guardadas en ${archivo} (no se sube al repo).`);
   }

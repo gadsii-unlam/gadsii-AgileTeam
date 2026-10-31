@@ -12,9 +12,17 @@ Alcance del MVP (brief v3.1, TP3 + correcciones TP4B):
 Fuera del MVP: tipos de vehículo, penalizaciones, más de un estacionamiento, QR/barrera,
 liberación automática por vencimiento, elegir una plaza puntual e historial de reservas.
 
+**Dónde corre:**
+
+| | Link público (producción) | Link de desarrollo |
+|---|---|---|
+| Dónde | **Netlify** (URL fija, siempre disponible) | Tu PC: http://localhost:3000 |
+| Base de datos | **Turso** (SQLite en la nube, compartida) | Archivo `src/data/parking.sqlite` (sólo tuyo) |
+| Para qué | Sesiones de prueba con U1–U3 | Programar y probar cambios |
+
 ---
 
-## Guía rápida
+## Guía rápida (desarrollo local)
 
 Si ya tenés todo instalado (ver [paso 1](#1-instalar-lo-necesario-una-sola-vez)):
 
@@ -22,24 +30,23 @@ Si ya tenés todo instalado (ver [paso 1](#1-instalar-lo-necesario-una-sola-vez)
 git clone https://github.com/gadsii-unlam/gadsii-AgileTeam.git
 cd gadsii-AgileTeam/src
 npm install
-npm run seed        # crea las cuentas (sólo la primera vez)
-npm start           # link de desarrollo: http://localhost:3000
-npm run publicar    # link público (en vez de npm start)
+npm run seed        # crea las cuentas locales (sólo la primera vez)
+npm start           # http://localhost:3000
 ```
 
-Los comandos son **los mismos en Windows y en Linux**.
+Los comandos son **los mismos en Windows y en Linux**. Para desarrollar no hace falta ninguna
+cuenta de Netlify ni de Turso.
 
 ---
 
 ## 1. Instalar lo necesario (una sola vez)
 
-| Programa | Para qué | ¿Quién lo necesita? |
-|---|---|---|
-| **Git** | Bajar el repositorio | Todos |
-| **Node.js 24 o superior** (incluye `npm`) | Correr la app | Todos |
-| **cloudflared** | Generar el link público | Sólo quien publica |
+| Programa | Para qué |
+|---|---|
+| **Git** | Bajar el repositorio |
+| **Node.js 22 o superior** (incluye `npm`) | Correr la app |
 
-No hace falta instalar ninguna base de datos: SQLite viene incluido en Node.
+No hace falta instalar ninguna base de datos: en local se usa un archivo SQLite.
 
 ### Windows (PowerShell)
 
@@ -48,13 +55,10 @@ Abrí **PowerShell** y corré:
 ```powershell
 winget install --id Git.Git -e
 winget install --id OpenJS.NodeJS.LTS -e
-winget install --id Cloudflare.cloudflared -e
 ```
 
 > Si `winget` no existe en tu PC, instalá a mano desde
-> [git-scm.com](https://git-scm.com/download/win), [nodejs.org](https://nodejs.org/) (versión LTS) y
-> [cloudflared para Windows](https://github.com/cloudflare/cloudflared/releases/latest) (archivo
-> `cloudflared-windows-amd64.msi`).
+> [git-scm.com](https://git-scm.com/download/win) y [nodejs.org](https://nodejs.org/) (versión LTS).
 
 **Cerrá y volvé a abrir PowerShell** para que reconozca los programas nuevos.
 
@@ -68,28 +72,20 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ### Linux (Ubuntu / Debian / WSL)
 
 ```bash
-# Git
 sudo apt update && sudo apt install -y git curl
 
 # Node.js (con nvm, sin necesidad de sudo)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 source ~/.bashrc
 nvm install --lts
-
-# cloudflared (sólo quien publica)
-curl -L -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-sudo dpkg -i cloudflared.deb && rm cloudflared.deb
 ```
 
 ### Verificar
 
-En cualquier sistema, estos comandos tienen que mostrar una versión:
-
 ```bash
 git --version
-node --version        # tiene que ser v24 o mayor
+node --version        # tiene que ser v22 o mayor
 npm --version
-cloudflared --version # sólo si vas a publicar
 ```
 
 ---
@@ -110,7 +106,7 @@ Si ya tenías el repositorio: `git pull` y después `npm install` dentro de `src
 
 ---
 
-## 3. Cargar las cuentas de prueba
+## 3. Cargar las cuentas de prueba (local)
 
 ```bash
 npm run seed
@@ -125,17 +121,15 @@ Crea estas cuentas (los nombres son ficticios, no hay datos personales en el rep
 | DEMO | `demo@unlam.edu.ar` | Demostraciones (formato docente) |
 
 Las **contraseñas** se generan al azar y quedan en **`src/data/credenciales.txt`**. Ese archivo
-**no se sube al repo**: hay que entregárselas a cada usuario en persona o por mensaje privado.
+**no se sube al repo**.
 
 - Correr el seed de nuevo no borra nada: sólo crea las cuentas que falten.
 - Para regenerar las contraseñas: `npm run seed -- --nuevas-claves`.
 - Para usar otras cuentas o contraseñas: copiar `usuarios.ejemplo.json` a `data/usuarios.json`,
   editarlo y correr `npm run seed`.
 
-> ⚠️ **Cada PC tiene su propia base de datos y sus propias contraseñas.** Las reservas y las
-> cuentas que existen en una PC no están en las demás. Las sesiones de prueba con U1–U3 tienen que
-> hacerse **siempre desde la misma PC** (la de quien publica), para que los datos de la primera
-> sesión sigan estando una semana después.
+> Las cuentas y reservas **locales** son sólo de tu PC. Las de producción (Netlify) están en Turso
+> y se cargan como se explica en el [paso 5](#5-publicar-en-netlify-una-sola-vez-la-hace-una-persona).
 
 ---
 
@@ -151,40 +145,76 @@ Para cortar: `Ctrl+C`.
 - Si usás **WSL**, el link también abre desde el navegador de Windows.
 - Para ver la app como en un celular: en Chrome o Edge apretá `F12` y después el ícono de
   dispositivo móvil (o `Ctrl+Shift+M`).
-- Durante el desarrollo, `npm run dev` reinicia el servidor solo cada vez que guardás un cambio.
+- `npm run dev` reinicia el servidor solo cada vez que guardás un cambio.
+- Si aparece el mensaje *".env not found. Continuing without it."*, es normal: significa que se
+  está usando la base local.
 
 ---
 
-## 5. Link público (para usar desde cualquier celular)
+## 5. Publicar en Netlify (una sola vez, la hace una persona)
 
-La app corre en la PC de un integrante y se publica con un **Cloudflare quick tunnel**: sin cuenta,
-sin abrir puertos del router y con HTTPS.
+La app se publica en **Netlify** y guarda los datos en **Turso** (una base SQLite en la nube).
+Las dos tienen plan gratuito y se puede entrar con la cuenta de GitHub. Todo se hace desde el
+navegador: no hace falta instalar nada más.
+
+### 5.1. Crear la base en Turso
+
+1. Entrar a [app.turso.tech](https://app.turso.tech) con GitHub.
+2. **Create Database**. Nombre: `unlam-parking`. Región: la más cercana a Argentina disponible
+   (por ejemplo São Paulo).
+3. En la base creada, botón **Connect** (o *Create Token*):
+   - Copiar la **URL** (empieza con `libsql://`).
+   - Generar un **token** con permiso de lectura y escritura y copiarlo.
+
+> El token da acceso total a la base: **no lo subas al repo ni lo pegues en chats públicos**.
+
+### 5.2. Cargar las cuentas en la base de Turso
+
+En tu PC, dentro de `src/`:
+
+1. Copiar `.env.ejemplo` como `.env` y completar `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN`.
+2. Correr:
+   ```bash
+   npm run seed
+   ```
+   Las tablas se crean solas. Las contraseñas de producción quedan en `data/credenciales.txt`
+   **de tu PC**: son las que hay que entregarles a U1, U2 y U3 (en persona o por mensaje privado).
+3. Opcional: borrar el `.env` o renombrarlo, para que `npm start` vuelva a usar la base local.
+   **No pruebes cosas contra la base de producción**: los datos de las sesiones están ahí.
+
+### 5.3. Crear el sitio en Netlify
+
+1. Entrar a [app.netlify.com](https://app.netlify.com) con GitHub.
+2. **Add new project → Import an existing project → GitHub** y elegir
+   `gadsii-unlam/gadsii-AgileTeam`. (Si no aparece, dar acceso a la organización `gadsii-unlam`
+   en la ventana de permisos de GitHub.)
+3. **Branch to deploy:** `mvp-tp5` (o `main` cuando esté mergeado). El resto de la configuración
+   (carpeta `src`, comando, función) ya está en el archivo `netlify.toml` de la raíz: no hay que
+   tocar nada.
+4. Antes de desplegar, en **Environment variables** agregar:
+   - `TURSO_DATABASE_URL` = la URL de Turso
+   - `TURSO_AUTH_TOKEN` = el token de Turso
+5. **Deploy**. Al terminar, Netlify muestra la URL (`algo-al-azar.netlify.app`).
+6. Para una URL más clara: **Project configuration → Change project name** → por ejemplo
+   `unlam-parking` → queda **https://unlam-parking.netlify.app** (si el nombre está libre).
+
+Para un QR de la URL (para mostrar en pantalla o mandar por mensaje):
 
 ```bash
-npm run publicar
+npm run qr -- https://unlam-parking.netlify.app
 ```
 
-(No hace falta correr `npm start` antes: `publicar` levanta el servidor solo. Si había un
-`npm start` abierto, cerralo primero.)
+Queda guardado en `data/url-publica.png`.
 
-El comando hace un backup de la base, levanta el servidor y el túnel, y muestra:
+### 5.4. Después
 
-- La **URL pública** (`https://algo-al-azar.trycloudflare.com`), también guardada en
-  `data/url-publica.txt`.
-- Un **QR con la URL**, para escanearlo desde la pantalla. También queda guardado en
-  `data/url-publica.png` para mandarlo por mensaje.
+- **Cada vez que se sube un cambio a la rama configurada, Netlify vuelve a publicar solo.**
+  Antes de publicar corre los tests: si alguno falla, no publica y la versión anterior sigue andando.
+- La URL **no cambia** y la app funciona aunque todas las PCs estén apagadas.
+- Si las variables de entorno se cambian en Netlify, hay que volver a desplegar
+  (**Deploys → Trigger deploy**).
 
-**Dejá la terminal abierta** mientras se use la app. `Ctrl+C` corta el servidor y el túnel.
-
-Importante:
-
-- **La URL cambia cada vez que se corre `npm run publicar`** (por ejemplo, después de apagar la PC).
-  Hay que mandarles la URL nueva a los usuarios antes de cada sesión.
-- Si la PC se apaga o se suspende, la URL deja de funcionar. Los datos **no** se pierden: quedan en
-  `data/parking.sqlite`.
-- La primera vez, la URL puede tardar unos segundos en cargar.
-
-URL del MVP: _se completa en cada sesión de prueba (cambia en cada publicación)._
+URL del MVP: _completar después del primer deploy (ej. https://unlam-parking.netlify.app)._
 
 ---
 
@@ -192,14 +222,14 @@ URL del MVP: _se completa en cada sesión de prueba (cambia en cada publicación
 
 | Problema | Solución |
 |---|---|
-| `"node"` / `"npm"` / `"cloudflared"` no se reconoce como comando | Cerrá y volvé a abrir la terminal. Si sigue, reinstalá el programa (paso 1). |
+| `"node"` / `"npm"` no se reconoce como comando | Cerrá y volvé a abrir la terminal. Si sigue, reinstalá Node (paso 1). |
 | Al correr `npm` en PowerShell: *"la ejecución de scripts está deshabilitada"* | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| Error con `node:sqlite` o `No such built-in module` | Tu Node es viejo: instalá la versión 24 o mayor (`node --version`). |
-| *"Ya hay un servidor corriendo en el puerto 3000"* o `EADDRINUSE` | Hay otro `npm start` / `npm run publicar` abierto: cerralo. O usá otro puerto (ver abajo). |
-| La URL pública muestra **Error 1033** de Cloudflare | El túnel no está corriendo: volvé a correr `npm run publicar` y usá la URL **nueva**. |
-| *"Falta instalar cloudflared"* | Instalalo (paso 1) y reabrí la terminal. |
-| El login dice que el correo o la contraseña no son correctos | Revisá `data/credenciales.txt` **de la PC donde corre la app**. |
-| La app se ve vacía o sin cuentas | Corré `npm run seed`. |
+| Error `bad option: --env-file-if-exists` | Tu Node es viejo: instalá la versión 22 o mayor (`node --version`). |
+| `EADDRINUSE` al hacer `npm start` | Ya hay otro `npm start` abierto: cerralo, o usá otro puerto (ver abajo). |
+| El login dice que el correo o la contraseña no son correctos | Las contraseñas locales y las de producción son distintas: usá las de `data/credenciales.txt` de la PC que corrió el seed contra esa base. |
+| La app local se ve sin cuentas | Corré `npm run seed`. |
+| El sitio de Netlify muestra *"Algo salió mal"* | Revisá que `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN` estén bien cargadas en Netlify y redesplegá. El detalle del error está en Netlify → **Logs → Functions → app**. |
+| El deploy de Netlify falla | En el log del deploy: si fallaron los tests, corré `npm test` en tu PC y arreglalo antes de volver a subir. |
 
 **Usar otro puerto** (por ejemplo 3001):
 
@@ -220,10 +250,13 @@ set PORT=3001 && npm start
 
 ## Configuración
 
-Se cambia con variables de entorno, igual que `PORT` arriba (no hay pantalla de administración en el MVP):
+Se cambia con variables de entorno: en local, igual que `PORT` arriba (o en el `.env`); en
+producción, en Netlify → **Environment variables** (y redesplegar). No hay pantalla de
+administración en el MVP.
 
 | Variable | Por defecto | Qué es |
 |---|---|---|
+| `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` | — (base local) | Base de Turso. Obligatorias en Netlify. |
 | `CAPACIDAD` | 15 | Lugares por franja de llegada |
 | `TOLERANCIA_MIN` | 15 | Minutos de tolerancia después de la hora reservada |
 | `FRANJA_MIN` | 30 | Cada cuántos minutos hay una franja |
@@ -232,18 +265,30 @@ Se cambia con variables de entorno, igual que `PORT` arriba (no hay pantalla de 
 | `LLEGUE_DESDE_MIN` | 60 | Desde cuántos minutos antes se habilita «Llegué» |
 | `OCUPACION_SIMULADA` | 1 | Suma ocupación ficticia de "otros usuarios" (`0` para desactivarla) |
 | `SESION_DIAS` | 5 | Días que dura la sesión sin usar la app |
-| `PORT` / `HOST` | 3000 / 127.0.0.1 | Dónde escucha el servidor |
-| `DB_PATH` | `data/parking.sqlite` | Archivo de la base |
+| `PORT` / `HOST` | 3000 / 127.0.0.1 | Dónde escucha el servidor local |
 
 Cómo se calcula la disponibilidad: cada franja tiene `CAPACIDAD` lugares; los ocupan las reservas
 activas de esa franja (llegue o no la persona: no hay liberación por vencimiento) más la ocupación
 simulada. La lógica está en `dominio/disponibilidad.js`.
 
+### Concurrencia
+
+En Netlify varias instancias de la app pueden atender pedidos al mismo tiempo contra la misma base.
+Para que dos personas nunca se queden con el mismo último lugar, cada escritura (reservar, cancelar,
+«Llegué») es **una sola sentencia SQL que incluye sus condiciones** (cupo libre, que el usuario no
+tenga otra reserva, estado de la reserva). SQLite/Turso ejecuta cada sentencia de forma atómica y las
+escrituras de a una, así que no hay ventana entre "verificar" y "guardar". Los tests de
+`test/reservas.test.js` lo comprueban disparando reservas simultáneas desde varias conexiones (por
+ejemplo, 60 personas por 15 lugares → exactamente 15 reservas).
+
 ---
 
 ## Datos para las métricas
 
-- `npm run backup` guarda una copia de la base en `data/backups/` (también se hace al publicar).
+Estos comandos usan la base configurada: la local, o la de Turso si hay un `.env` (ver 5.2).
+
+- `npm run backup` guarda una copia de todas las tablas en `data/backups/` (archivo JSON).
+  Conviene hacerlo antes y después de cada sesión de prueba.
 - `npm run -s eventos > eventos.csv` exporta el log interno (login, login fallido, reserva creada,
   reserva cancelada, «Llegué», cierre de sesión) con fecha y hora de Argentina y la etiqueta del
   usuario (U1, U2…). Es un apoyo: la observación de las sesiones sigue siendo humana.
@@ -252,19 +297,17 @@ simulada. La lógica está en `dominio/disponibilidad.js`.
 
 ### Consultar la base de datos
 
-La base es el archivo `src/data/parking.sqlite`. Tres formas de verla:
-
-1. **VS Code**: instalar la extensión *SQLite Viewer* y abrir el archivo (sólo lectura).
-2. **Línea de comandos**: instalar `sqlite3` (Linux: `sudo apt install sqlite3`; Windows:
-   `winget install SQLite.SQLite`) y correr `sqlite3 data/parking.sqlite`. Adentro conviene usar
-   `.headers on` y `.mode box`.
-3. **Sin instalar nada**, con Node:
-   ```bash
-   node -e "const {DatabaseSync}=require('node:sqlite'); console.table(new DatabaseSync('data/parking.sqlite').prepare(process.argv[1]).all())" "SELECT * FROM reservas"
-   ```
+- **Producción (Turso):** en [app.turso.tech](https://app.turso.tech), abrir la base y usar la
+  pestaña **Shell / SQL** (o *Edit Data*) para correr consultas.
+- **Local:** la base es el archivo `src/data/parking.sqlite`. Se puede abrir con la extensión
+  *SQLite Viewer* de VS Code, con `sqlite3 data/parking.sqlite` (Linux: `sudo apt install sqlite3`;
+  Windows: `winget install SQLite.SQLite`), o sin instalar nada:
+  ```bash
+  node -e "require('@libsql/client').createClient({url:'file:data/parking.sqlite'}).execute(process.argv[1]).then(r=>console.table(r.rows))" "SELECT * FROM reservas"
+  ```
 
 Las columnas `fecha` y `hora` de las reservas están en hora de Argentina; las que terminan en `_en`
-están en UTC (3 horas más). Antes de modificar datos a mano, hacer `npm run backup` y apagar el servidor.
+están en UTC (3 horas más). Antes de modificar datos a mano, hacer `npm run backup`.
 
 ---
 
@@ -274,31 +317,34 @@ están en UTC (3 horas más). Antes de modificar datos a mano, hacer `npm run ba
 npm test
 ```
 
-Prueban la lógica de disponibilidad y reservas, y recorren el flujo completo por HTTP
-(login → reservar → «Llegué» → cancelar → cerrar sesión).
+Prueban la lógica de disponibilidad y reservas, la concurrencia (reservas simultáneas) y recorren
+el flujo completo por HTTP (login → reservar → «Llegué» → cancelar → cerrar sesión).
 
 ---
 
 ## Estructura
 
 ```
+netlify.toml           (en la raíz del repo) configuración de Netlify
 src/
-  server.js            arranque del servidor
+  server.js            servidor para desarrollo local
+  netlify/functions/   la app como función de Netlify
   app.js               rutas y pantallas (Express)
   config.js            parámetros del MVP
-  db/                  esquema y conexión SQLite
+  db/                  esquema y conexión (Turso o archivo SQLite local)
   dominio/             lógica propia: disponibilidad, reservas, sesiones, eventos
   vistas/              pantallas (plantillas EJS, renderizadas en el servidor)
   public/              estilos, JS mínimo, íconos, manifest y service worker (PWA)
-  scripts/             seed, backup, exportar eventos, publicar (+ QR de la URL), generar íconos
+  scripts/             seed, backup, exportar eventos, QR de la URL, generar íconos
   test/                tests (node:test)
-  data/                base, credenciales, backups y URL pública (no se sube al repo)
+  data/                base local, credenciales y backups (no se sube al repo)
 ```
 
 ## Seguridad (resumen)
 
 - Las contraseñas se guardan con hash bcrypt; el celular sólo guarda una cookie de sesión
-  `HttpOnly` (y `Secure` cuando se accede por HTTPS), y en la base se guarda el hash del token.
-- El servidor sólo escucha en `127.0.0.1`: desde internet sólo se llega a través del túnel.
-- Consultas SQL parametrizadas, límite de intentos de login, cabeceras de seguridad (CSP, etc.).
-- Recomendación: levantar el túnel sólo durante las sesiones de prueba.
+  `HttpOnly` y `Secure`, y en la base se guarda el hash del token.
+- El token de Turso sólo está en las variables de entorno de Netlify y en el `.env` local de quien
+  carga las cuentas (ninguno de los dos se sube al repo).
+- Consultas SQL parametrizadas, límite de intentos de login (guardado en la base), cabeceras de
+  seguridad (CSP, etc.).

@@ -1,6 +1,5 @@
 // Parámetros del MVP. Se pueden cambiar con variables de entorno sin tocar código
 // (no hay pantalla de administración en el MVP).
-const path = require('node:path');
 
 function entero(nombre, porDefecto) {
   const valor = process.env[nombre];
@@ -17,9 +16,13 @@ function horaAMinutos(hhmm) {
 
 module.exports = {
   puerto: entero('PORT', 3000),
-  // Sólo escucha en la PC local: el túnel de Cloudflare se conecta a localhost.
   host: process.env.HOST || '127.0.0.1',
-  rutaBase: process.env.DB_PATH || path.join(__dirname, 'data', 'parking.sqlite'),
+  db: {
+    // En Netlify: la base Turso. En local, si no hay variables: un archivo SQLite en data/
+    // (ruta relativa a src/, que es desde donde corren los comandos npm; así funciona igual en Windows).
+    url: process.env.TURSO_DATABASE_URL || 'file:data/parking.sqlite',
+    authToken: process.env.TURSO_AUTH_TOKEN || undefined,
+  },
 
   // Argentina no tiene horario de verano desde 2009: el offset es fijo.
   offsetUtc: '-03:00',

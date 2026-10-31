@@ -1,5 +1,3 @@
-PRAGMA foreign_keys = ON;
-
 CREATE TABLE IF NOT EXISTS usuarios (
   id            INTEGER PRIMARY KEY,
   correo        TEXT NOT NULL UNIQUE,

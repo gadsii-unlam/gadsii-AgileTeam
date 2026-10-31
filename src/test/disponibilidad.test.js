@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const config = require('../config');
+const { ejecutar } = require('../db/db');
 const { aEpoch, etiquetaFecha } = require('../dominio/tiempo');
 const { franjasEnVentana, ocupacionSimulada, disponibilidad, opcionesReserva } = require('../dominio/disponibilidad');
 const { baseDePrueba, crearUsuario, cfgSinSimulacion } = require('./utilidades');
@@ -38,23 +39,23 @@ test('la ocupación simulada es estable y nunca supera la capacidad', () => {
   assert.equal(ocupacionSimulada('2026-11-02', '19:00', cfgSinSimulacion()), 0);
 });
 
-test('cada reserva activa resta un lugar en su franja; las canceladas no', () => {
-  const db = baseDePrueba();
-  const usuario = crearUsuario(db);
+test('cada reserva activa resta un lugar en su franja; las canceladas no', async () => {
+  const db = await baseDePrueba();
+  const usuario = await crearUsuario(db);
   const cfg = cfgSinSimulacion({ capacidad: 3 });
-  const insertar = db.prepare("INSERT INTO reservas (usuario_id, fecha, hora, estado, creada_en) VALUES (?, '2026-11-02', '19:00', ?, '')");
-  insertar.run(usuario, 'activa');
-  insertar.run(usuario, 'cancelada');
-  const franja = disponibilidad(db, LUNES_17, cfg).find((f) => f.hora === '19:00' && f.fecha === '2026-11-02');
+  const insertar = "INSERT INTO reservas (usuario_id, fecha, hora, estado, creada_en) VALUES (?, '2026-11-02', '19:00', ?, '')";
+  await ejecutar(db, insertar, [usuario, 'activa']);
+  await ejecutar(db, insertar, [usuario, 'cancelada']);
+  const franja = (await disponibilidad(db, LUNES_17, cfg)).find((f) => f.hora === '19:00' && f.fecha === '2026-11-02');
   assert.equal(franja.libres, 2);
 });
 
-test('las franjas llenas no aparecen en las opciones (H4)', () => {
-  const db = baseDePrueba();
-  const usuario = crearUsuario(db);
+test('las franjas llenas no aparecen en las opciones (H4)', async () => {
+  const db = await baseDePrueba();
+  const usuario = await crearUsuario(db);
   const cfg = cfgSinSimulacion({ capacidad: 1 });
-  db.prepare("INSERT INTO reservas (usuario_id, fecha, hora, creada_en) VALUES (?, '2026-11-02', '19:00', '')").run(usuario);
-  const hoy = opcionesReserva(db, LUNES_17, cfg).find((o) => o.fecha === '2026-11-02');
+  await ejecutar(db, "INSERT INTO reservas (usuario_id, fecha, hora, creada_en) VALUES (?, '2026-11-02', '19:00', '')", [usuario]);
+  const hoy = (await opcionesReserva(db, LUNES_17, cfg)).find((o) => o.fecha === '2026-11-02');
   assert.equal(hoy.etiqueta, 'Hoy, lunes 2/11');
   assert.ok(!hoy.horas.some((h) => h.hora === '19:00'));
   assert.ok(hoy.horas.some((h) => h.hora === '19:30'));

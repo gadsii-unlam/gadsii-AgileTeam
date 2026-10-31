@@ -6,22 +6,24 @@
   "type": "commonjs",
   "main": "server.js",
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "seed": "node scripts/seed.js",
-    "backup": "node scripts/backup.js",
-    "eventos": "node scripts/exportar-eventos.js",
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js",
+    "backup": "node --env-file-if-exists=.env scripts/backup.js",
+    "eventos": "node --env-file-if-exists=.env scripts/exportar-eventos.js",
     "iconos": "node scripts/generar-iconos.js",
-    "publicar": "node scripts/publicar.js",
+    "qr": "node scripts/qr-url.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
+    "@libsql/client": "0.18.0",
     "bcryptjs": "3.0.3",
     "ejs": "7.0.2",
     "express": "5.3.0",
-    "qrcode": "1.5.4"
+    "qrcode": "1.5.4",
+    "serverless-http": "4.0.0"
   }
 }

@@ -10,8 +10,8 @@ const CORREO = 'prueba@alumno.unlam.edu.ar';
 const CLAVE = 'clave1234';
 
 async function levantar() {
-  const db = baseDePrueba();
-  crearUsuario(db, CORREO, CLAVE, 'T1');
+  const db = await baseDePrueba();
+  await crearUsuario(db, CORREO, CLAVE, 'T1');
   const reloj = { ahora: aEpoch('2026-11-02', '17:00') };
   const app = crearApp({ db, reloj: () => reloj.ahora });
   const servidor = await new Promise((ok) => {
@@ -88,7 +88,7 @@ test('flujo completo del MVP', async (t) => {
   // Llegué: a la hora reservada
   reloj.ahora = aEpoch('2026-11-02', hora) + 3 * MIN;
   const idReserva = confirmacion.html.match(/name="reserva" value="(\d+)"/)?.[1]
-    ?? db.prepare('SELECT id FROM reservas').get().id;
+    ?? (await db.execute('SELECT id FROM reservas')).rows[0].id;
   assert.equal((await pedir('/reserva/llegue', { form: { reserva: String(idReserva) } })).location, '/reserva');
   const despuesDeLlegar = await pedir('/reserva');
   assert.match(despuesDeLlegar.html, /Registraste tu llegada a las \d\d:\d\d hs, a tiempo/);
@@ -121,7 +121,7 @@ test('flujo completo del MVP', async (t) => {
   assert.equal((await pedir('/salir', { form: {} })).location, '/login');
   assert.equal((await pedir('/')).location, '/login');
 
-  const tipos = db.prepare('SELECT tipo FROM eventos ORDER BY id').all().map((e) => e.tipo);
+  const tipos = (await db.execute('SELECT tipo FROM eventos ORDER BY id')).rows.map((e) => e.tipo);
   assert.deepEqual(tipos, ['login_fallido', 'login', 'reserva_creada', 'llegue', 'reserva_creada', 'reserva_cancelada', 'logout']);
 });
 
