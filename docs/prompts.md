@@ -50,7 +50,7 @@
 | ~~Script de publicación escrito en Node (no en bash) para que funcione igual en Windows y Linux~~ Eliminado al migrar a Netlify | IA |
 | Despliegue en Netlify: URL fija y disponible sin depender de una PC encendida | Equipo |
 | Base de datos de producción en Turso (SQLite/libSQL en la nube) para mantener SQLite como persistencia; en desarrollo y tests, archivo SQLite local con el mismo cliente (`@libsql/client`) | IA |
-| La app Express corre como una única función de Netlify (`serverless-http`); los archivos estáticos los sirve el CDN de Netlify; `netlify.toml` en la raíz con `base = "src"` y `npm test` como paso de build | IA |
+| La app Express corre como una única función de Netlify (`serverless-http`); los archivos estáticos los sirve el CDN de Netlify; `netlify.toml` en la raíz con rutas desde la raíz del repo (sin `base`, porque la CLI de Netlify las resolvía distinto según el comando) y `npm test` como paso de build | IA |
 | Concurrencia: cada escritura (reservar, cancelar, «Llegué») es una sola sentencia SQL atómica con sus condiciones (cupo, reserva pendiente, estado), en lugar de "verificar y después guardar"; tests con reservas simultáneas desde varias conexiones | IA |
 | Límite de intentos de login y sesiones guardados en la base (no en memoria), porque en Netlify cada pedido puede atenderlo una instancia distinta | IA |
 | Backup como exportación JSON de todas las tablas (funciona con la base local y con Turso) | IA |
