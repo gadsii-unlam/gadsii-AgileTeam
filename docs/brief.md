@@ -239,4 +239,4 @@ Para testear la hipótesis de valor con el prototipo del MVP se definieron dos m
 
 ### Criterio de éxito
 
-> La hipótesis se sostiene en caso de que los tres usuarios logren realizar una reserva sin necesidad de solicitar ayuda.
+> La hipótesis se sostiene en caso de que los tres usuarios logren estacionar en menos de 5 minutos.
