@@ -1,0 +1,19 @@
+<%- include('partes/arriba', { titulo: 'Cancelar reserva' }) %>
+
+<h1>Cancelar reserva</h1>
+
+<section class="estado">
+  <p class="estado-principal">¿Seguro que querés cancelar tu reserva?</p>
+  <p><%= reserva.fechaTexto %>, llegada <%= reserva.hora %> hs.</p>
+  <p>El lugar va a quedar libre para otra persona.</p>
+</section>
+
+<div class="acciones">
+  <form method="post" action="/reserva/cancelar">
+    <input type="hidden" name="reserva" value="<%= reserva.id %>">
+    <button type="submit" class="boton peligro-lleno">Sí, cancelar</button>
+  </form>
+  <a class="boton secundario" href="/reserva">No, volver</a>
+</div>
+
+<%- include('partes/abajo') %>

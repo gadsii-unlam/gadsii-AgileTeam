@@ -5,3 +5,5 @@ Integrantes: Barcia Matías, De Vito Daniel, Ledesma Miguel, Militello Nicolás 
 Producto: Una app para que miembros de la comunidad Unlam, como estudiantes, docentes e invitados puedan reservar un lugar en el estacionamiento de la universidad.
 
 Segmento de la comunidad UNLaM: Personas que vayan a la Unlam en su propio vehículo y usen el estacionamiento de la universidad.
+
+MVP (TP5): el código está en [`src/`](src/). Cómo instalarlo, correrlo y publicarlo (Windows y Linux): [`src/README.md`](src/README.md).

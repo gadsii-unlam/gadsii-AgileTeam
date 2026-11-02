@@ -24,3 +24,13 @@ Thumbs.db
 
 # Logs
 *.log
+
+# MVP Unlam Parking: base de datos, credenciales y backups (no se suben)
+src/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Netlify CLI
+.netlify/
+src/PARA_USAR_PROD_BORRAR_NOMBRE.env
