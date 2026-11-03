@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versión** | 5.0 |
-| **Fecha** | 31/10/2026 |
+| **Versión** | 5.1 |
+| **Fecha** | 03/11/2026 |
 | **Equipo** | Agile Team |
 | **Materia** | Gestión Aplicada al Desarrollo de Software II (3665) |
 | **Cátedra** | Departamento de Ingeniería e Investigaciones Tecnológicas — Ingeniería Informática, UNLaM |
@@ -16,6 +16,9 @@
 Esta versión incorpora las métricas que serán evaluadas en el MVP. Los cambios principales son:
 
 - Se definen dos métricas accionables y una vanidosa, y el criterio en base al que se decidirá si se persevera o prospera.
+- Se construye el MVP, se prepara la sesión de prueba y se prueba con tres usuarios reales (secciones 14 a 16).
+- Se analizan los resultados en las dos capas, usabilidad y negocio, y se decide perseverar (secciones 17 y 18).
+
 ---
 
 ## 1. Segmento
@@ -240,3 +243,65 @@ Para testear la hipótesis de valor con el prototipo del MVP se definieron dos m
 ### Criterio de éxito
 
 > La hipótesis se sostiene en caso de que los tres usuarios logren estacionar en menos de 5 minutos.
+
+
+---
+
+## 14. Construcción del MVP
+
+El MVP fue construido con Claude Code y publicado en Netlify. El código fuente y las dependencias se encuentran en el repositorio.
+
+| Recurso | Enlace |
+|---|---|
+| Código fuente | [Repositorio MVP](https://github.com/gadsii-unlam/gadsii-AgileTeam/tree/mvp-tp5) |
+| Aplicación publicada | [Unlam Parking](https://unlam-parking.netlify.app/) |
+
+---
+
+## 15. Preparación de la sesión de prueba
+
+Se le pide al usuario que realice las siguientes tareas:
+
+1. Realizar una reserva desde su casa para el próximo día.
+2. Cancelar una reserva desde su casa.
+3. Completar una reserva luego de estacionar.
+
+Durante la sesión se observa si el usuario tiene dudas a la hora de realizar, cancelar, visualizar y/o completar una reserva. Se registra mediante notas y tiempos y, al final, se le pregunta si la app le resolvió el problema que tenía.
+
+---
+
+## 16. Prueba con usuarios reales
+
+Se realizaron pruebas con tres usuarios y se dejaron evidencias de las reuniones en el repositorio, en la carpeta de [evidencia](https://github.com/gadsii-unlam/gadsii-AgileTeam/tree/main/docs/evidencia).
+
+---
+
+## 17. Análisis en las dos capas
+
+### Capa de usabilidad
+
+- Los tres usuarios completaron las tareas definidas sin realizar ninguna consulta.
+- Ninguno de los problemas identificados en el TP 4 volvió a aparecer, ya que se agregaron la lista desplegable para seleccionar la fecha y el horario, y el botón de ayuda, disponible en cada pantalla de la app (excepto en Login).
+- **Problema nuevo detectado:** si se completa una reserva, es posible generar otra reserva para el mismo turno siempre que el horario aún lo permita. Se corregirá en la próxima versión.
+
+### Capa de negocio
+
+El producto genera el valor que prometía la hipótesis: permitió que los tres alumnos reservaran un lugar en el estacionamiento, con una garantía que les dio tranquilidad, y optimizó el acto de estacionar, que pudieron hacer en menos de 5 minutos.
+
+Como la app todavía no está integrada con el estacionamiento, además de generar las reservas de forma nativa en la aplicación, se solicitó de antemano una reserva de tres lugares para simular la integración y así verificar si los alumnos lograban estacionar en menos de 5 minutos.
+
+Los tres alumnos estacionaron en menos de 5 minutos y todos enviaron una captura de pantalla tras haber llegado y presionado **"Llegué"**. Las capturas se dejaron como evidencia en el repositorio, en la carpeta de [evidencia](https://github.com/gadsii-unlam/gadsii-AgileTeam/tree/main/docs/evidencia).
+
+Los resultados fueron exitosos respecto del criterio de éxito, por lo que la conclusión se detalla en la sección siguiente.
+
+---
+
+## 18. Pivotar o perseverar
+
+**Decisión: perseverar.** La hipótesis se sostiene, por lo que el equipo decide seguir puliendo la app para llegar a un producto completo.
+
+Los próximos cambios incluirían:
+
+- Integración real con el sistema universitario.
+- Integración real con el estacionamiento.
+- Corrección del bug de reservas descrito en la sección 17 (posibilidad de generar otra reserva para el mismo turno tras completar una).
