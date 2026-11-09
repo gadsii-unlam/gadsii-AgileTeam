@@ -2,22 +2,22 @@
 
 | | |
 |---|---|
-| **Versión** | 5.1 |
-| **Fecha** | 03/11/2026 |
+| **Versión** | 6.0 |
+| **Fecha** | 09/11/2026 |
 | **Equipo** | Agile Team |
 | **Materia** | Gestión Aplicada al Desarrollo de Software II (3665) |
 | **Cátedra** | Departamento de Ingeniería e Investigaciones Tecnológicas — Ingeniería Informática, UNLaM |
-| **Origen** | TP 5 - MVP |
+| **Origen** | TP 6 - Arquitectura del Sistema |
 
 ---
 
 ## Cambios respecto de la versión anterior
 
-Esta versión incorpora las métricas que serán evaluadas en el MVP. Los cambios principales son:
+Esta versión parte de la versión 5.1 e incorpora la gran visión del producto en términos de arquitectura y las restricciones técnicas del contexto. Los cambios principales son:
 
-- Se definen dos métricas accionables y una vanidosa, y el criterio en base al que se decidirá si se persevera o prospera.
-- Se construye el MVP, se prepara la sesión de prueba y se prueba con tres usuarios reales (secciones 14 a 16).
-- Se analizan los resultados en las dos capas, usabilidad y negocio, y se decide perseverar (secciones 17 y 18).
+- Se describe la arquitectura de la gran visión y qué parte cubre el MVP (sección 19).
+- Se identifica el salto arquitectónico más grande entre el MVP y el producto completo (sección 19).
+- Se documentan las restricciones técnicas del contexto (sección 20).
 
 ---
 
@@ -305,3 +305,43 @@ Los próximos cambios incluirían:
 - Integración real con el sistema universitario.
 - Integración real con el estacionamiento.
 - Corrección del bug de reservas descrito en la sección 17 (posibilidad de generar otra reserva para el mismo turno tras completar una).
+
+---
+
+## 19. Arquitectura de la gran visión
+
+![Arquitectura de la gran visión](arquitectura/vision.png)
+
+El recuadro verde marca lo que ya cubre el MVP. El detalle de cómo está construido hoy se encuentra en [arquitectura/mvp-real.png](arquitectura/mvp-real.png).
+
+| Parte del producto | Estado |
+|---|---|
+| App web móvil, motor de reservas, disponibilidad, registro de eventos y base de datos | Construido en el MVP |
+| Autenticación | Simulada con cuentas precargadas; falta integrarla con las cuentas universitarias |
+| Validación de ingreso con QR, lector y barrera | Falta construir |
+| Panel de administración y puesto de seguridad | Falta construir |
+| Liberación por vencimiento y penalizaciones | Falta construir |
+| Tipos de vehículo y varios estacionamientos | Falta construir |
+| Selección de evento e integración con el Teatro | Falta construir |
+
+**Diferencias entre el MVP construido y el flujo de la sección 11.** La alternativa B reemplazó los dos botones del menú por un Inicio que muestra el estado de la reserva; el QR fue reemplazado por el botón «Llegué»; la reserva se hace por turnos de 8, 14 y 19 hs (sábados 8 y 14), con 15 lugares por turno; y la aplicación está publicada en Netlify con la base de datos en Turso.
+
+**Salto arquitectónico más grande.** Pasar de una aplicación que sólo registra intenciones a un sistema que controla el acceso físico al predio. Hoy, si la app falla, el usuario estaciona como siempre; con la validación contra la barrera, una falla deja autos sin poder entrar. Eso cambia las exigencias de disponibilidad, obliga a definir qué pasa cuando no hay conexión o falla el lector, y hace que la reserva tenga que coincidir con la ocupación real del estacionamiento.
+
+---
+
+## 20. Restricciones técnicas del contexto
+
+| Restricción | Origen | Qué implica para la arquitectura |
+|---|---|---|
+| La universidad no confirmó la autorización ni la viabilidad de integrar la barrera y el Teatro. | Supuesto S5, sin evidencia | Las integraciones siguen siendo un riesgo abierto y no se puede asumir ninguna interfaz. |
+| No se conoce el sistema de cuentas de la UNLaM ni si admite integraciones. | Sin relevar | La autenticación real depende de esa respuesta. |
+| No se conocen el lector ni la barrera del predio, ni su conectividad. | Sin relevar | La validación de ingreso no puede diseñarse en detalle todavía. |
+| La fila previa a la barrera ya demora entre 5 y 10 minutos. | Relevamiento TP2 | La validación en el ingreso tiene que ser rápida y prever fallas de red. |
+| Los usuarios tienen buena conexión con datos móviles en la zona de ingreso. | Supuesto S4 refutado en el TP2 | Una app web es viable para el usuario; no dice nada sobre la red de la barrera. |
+| Los usuarios usan iOS y Android. | Contacto inicial y TP2 | Conviene una única solución web o multiplataforma. |
+| El volumen de vehículos diarios (1.500) no está confirmado. | Supuesto S7, sin evidencia | La capacidad necesaria no está dimensionada. |
+| La demanda se concentra en el ingreso a las clases. | Relevamiento TP2 y horarios de cursada | Las reservas e ingresos llegan en picos cercanos a cada turno. |
+| Un auto puede permanecer varios turnos en el predio. | Horarios de cursada | La ocupación real no se puede calcular por turnos independientes. |
+| Las políticas de la universidad sobre datos personales y servicios externos no están relevadas. | Sin relevar | Hoy los datos están en servicios de terceros; podría no ser aceptable con datos reales. |
+| No está definido quién mantendría el sistema. | Sin relevar | Condiciona la elección de tecnologías y de infraestructura. |

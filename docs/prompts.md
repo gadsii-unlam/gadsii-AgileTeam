@@ -21,6 +21,7 @@
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Migrar el despliegue a Netlify (URL única, sin depender de una PC encendida) y revisar si la app soporta que muchos usuarios reserven al mismo tiempo | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Corregir que un horario con lugares desaparezca antes de su hora de inicio y agregar un botón visible de cerrar sesión | TP 5 |
 |31/10/2026| Claude Opus 5.5 (Claude Code) | Reservar por turnos de cursada (8, 14 y 19 hs; sábados 8 y 14), quitar la ocupación simulada y agregar registro de usuarios; validar antes contra la documentación. Tras el análisis se descarta el registro (el scope define cuentas precargadas) y se mantiene la disponibilidad visible | TP 5 |
+|09/11/2026| Claude Opus 5.5 (Claude Code) | Resumen del trabajo del TP6: revisar la consigna contra el repositorio y el código, producir los diagramas de la arquitectura real del MVP y de la gran visión, reunir la evidencia para clasificar las decisiones heredadas, explorar tecnologías, proponer el componente más riesgoso y actualizar el brief a la versión 6.0. La validación del diagrama contra el código y la clasificación de las decisiones quedan a cargo del equipo | TP 6 |
 
 ## Decisiones del MVP (TP5)
 
