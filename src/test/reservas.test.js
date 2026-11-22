@@ -43,6 +43,14 @@ test('cancelar libera la reserva y permite reservar de nuevo', async () => {
   await r.crearReserva(db, usuario, '2026-11-02', '19:00', LUNES_17, cfg);
 });
 
+test('después de «Llegué» no se puede reservar el mismo turno, pero sí otro (bug del TP5)', async () => {
+  const { db, usuario, id } = await preparar();
+  await r.registrarLlegada(db, usuario, id, HORA_19 - 30 * MIN, cfg);
+  await assert.rejects(r.crearReserva(db, usuario, '2026-11-02', '19:00', HORA_19 - 29 * MIN, cfg), /Ya tenés una reserva para ese turno/);
+  await r.crearReserva(db, usuario, '2026-11-03', '08:00', HORA_19 - 29 * MIN, cfg);
+  assert.equal(await activas(db), 2);
+});
+
 test('no se puede cancelar la reserva de otra persona', async () => {
   const { db, id } = await preparar();
   const otro = await crearUsuario(db, 'otro@alumno.unlam.edu.ar');
@@ -68,10 +76,15 @@ test('si no aprieta "Llegué" antes de la tolerancia queda como "no llegó" (só
   assert.equal(r.estadoReserva(await leer(), despues, cfg), 'no_llego');
   assert.equal(r.puedeCancelar(await leer(), despues, cfg), false);
   await assert.rejects(r.cancelarReserva(db, usuario, id, despues, cfg), r.ErrorReserva);
-  // sigue mostrándose ese día y se puede registrar la llegada tarde
+  // sigue mostrándose ese día, pero ya no se puede registrar la llegada
   assert.equal(Number((await r.reservaActual(db, usuario, despues, cfg)).id), id);
-  await r.registrarLlegada(db, usuario, id, despues, cfg);
-  assert.equal(r.estadoReserva(await leer(), despues, cfg), 'llegada_tarde');
+  assert.equal(r.puedeRegistrarLlegada(await leer(), despues, cfg), false);
+  await assert.rejects(r.registrarLlegada(db, usuario, id, despues, cfg), r.ErrorReserva);
+  assert.equal(r.estadoReserva(await leer(), despues, cfg), 'no_llego');
+  // justo al terminar la tolerancia todavía se puede
+  const otro = await preparar();
+  await r.registrarLlegada(otro.db, otro.usuario, otro.id, HORA_19 + 15 * MIN, cfg);
+  assert.equal(r.estadoReserva(await otro.leer(), HORA_19 + 15 * MIN, cfg), 'llegada');
   // el lugar no se libera (no hay liberación por vencimiento)
   assert.equal(await activas(db), 1);
 });

@@ -104,6 +104,11 @@ test('flujo completo del MVP', async (t) => {
   // Horas de mañana: las trae el JSON embebido
   const opciones = JSON.parse(reservar2.html.match(/id="datos-opciones">([^<]*)</)[1]);
   const horaManana = opciones.find((o) => o.fecha === manana).horas[0].hora;
+  // El turno que ya reservó (y en el que registró la llegada) no le aparece ni lo puede volver a reservar
+  assert.ok(!(opciones.find((o) => o.fecha === '2026-11-02')?.horas ?? []).some((h) => h.hora === hora));
+  const repetida = await pedir('/reservas', { form: { fecha: '2026-11-02', hora } });
+  assert.equal(repetida.status, 409);
+  assert.match(repetida.html, /Ya tenés una reserva para ese turno/);
   assert.equal((await pedir('/reservas', { form: { fecha: manana, hora: horaManana } })).location, '/reserva?nueva=1');
 
   const cancelar = await pedir('/reserva/cancelar');

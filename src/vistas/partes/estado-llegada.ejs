@@ -5,5 +5,5 @@
 <% } else if (reserva.estado === 'llegada_tarde') { %>
   <p class="alerta">Registraste tu llegada a las <%= reserva.horaLlegada %> hs, después de la tolerancia.</p>
 <% } else if (reserva.estado === 'no_llego') { %>
-  <p class="alerta">No registraste tu llegada a tiempo (antes de las <%= reserva.limite %> hs).</p>
+  <p class="alerta">No registraste tu llegada a tiempo (antes de las <%= reserva.limite %> hs). Ya no se puede registrar.</p>
 <% } %>
