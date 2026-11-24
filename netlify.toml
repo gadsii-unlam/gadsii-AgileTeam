@@ -12,8 +12,8 @@
 
 [functions]
   directory = "src/netlify/functions"
-  # Plantillas y esquema se leen del disco en tiempo de ejecución: hay que incluirlos.
-  included_files = ["src/vistas/**", "src/db/schema.sql"]
+  # Plantillas, esquema y parámetros se leen del disco en tiempo de ejecución: hay que incluirlos.
+  included_files = ["src/vistas/**", "src/db/schema.sql", "src/parametros.json"]
 
 # Todo lo que no sea un archivo de src/public/ lo atiende la app.
 [[redirects]]

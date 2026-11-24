@@ -32,6 +32,46 @@ function escribirCookieSesion(req, res, token) {
   });
 }
 
+// "08:00" -> "8", "08:30" -> "8:30"
+const horaCorta = (hora) => hora.replace(/^0/, '').replace(/:00$/, '');
+
+function enumerar(lista, conjuncion) {
+  return lista.length <= 1 ? lista.join('') : `${lista.slice(0, -1).join(', ')} ${conjuncion} ${lista.at(-1)}`;
+}
+
+// Turnos de la semana en palabras, para la Ayuda: "de lunes a viernes, 8, 14 o 19 hs; los sábados, 8 o 14 hs".
+// Agrupa los días seguidos (de lunes a domingo) que tienen los mismos turnos y omite los cerrados.
+function resumenHorarios(cfg = config) {
+  const NOMBRES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const PLURAL = ['los domingos', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados'];
+  const orden = [1, 2, 3, 4, 5, 6, 0];
+  const grupos = [];
+  for (const dia of orden) {
+    const horas = cfg.turnos[dia].join(',');
+    const ultimo = grupos.at(-1);
+    if (ultimo && ultimo.horas === horas) ultimo.dias.push(dia);
+    else grupos.push({ horas, dias: [dia] });
+  }
+  const partes = grupos
+    .filter((g) => g.horas !== '')
+    .map((g) => {
+      const dias =
+        g.dias.length === 7 ? 'todos los días'
+        : g.dias.length === 1 ? PLURAL[g.dias[0]]
+        : g.dias.length === 2 ? `${PLURAL[g.dias[0]]} y ${NOMBRES[g.dias[1]]}`
+        : `de ${NOMBRES[g.dias[0]]} a ${NOMBRES[g.dias.at(-1)]}`;
+      return `${dias}, ${enumerar(g.horas.split(',').map(horaCorta), 'o')} hs`;
+    });
+  return partes.length ? partes.join('; ') : 'por ahora no hay turnos configurados';
+}
+
+// "60 minutos" -> "una hora", "90" -> "90 minutos"
+function duracion(minutos) {
+  if (minutos === 60) return 'una hora';
+  if (minutos > 0 && minutos % 60 === 0) return `${minutos / 60} horas`;
+  return minutos === 1 ? '1 minuto' : `${minutos} minutos`;
+}
+
 const minusculaInicial = (texto) => texto.charAt(0).toLowerCase() + texto.slice(1);
 
 // Sólo rutas internas, para que "volver" no pueda llevar a otro sitio.
@@ -68,7 +108,6 @@ function crearApp({ db, reloj = () => Date.now(), confiarProxy = 'loopback' }) {
   app.engine('ejs', require('ejs').renderFile);
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'vistas'));
-  app.locals.toleranciaMin = config.toleranciaMin;
 
   app.use((req, res, next) => {
     res.set({
@@ -77,6 +116,13 @@ function crearApp({ db, reloj = () => Date.now(), confiarProxy = 'loopback' }) {
       'Referrer-Policy': 'same-origin',
       'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
     });
+    // Toma los cambios de parametros.json sin reiniciar (escenarios en vivo).
+    config.recargarParametros();
+    res.locals.toleranciaMin = config.toleranciaMin;
+    res.locals.llegueDesdeTexto = config.llegueDesdeMin === 0 ? 'la hora de tu turno' : `${duracion(config.llegueDesdeMin)} antes de tu turno`;
+    res.locals.ventanaHoras = config.ventanaHoras;
+    res.locals.ventanaTexto = config.ventanaHoras === 1 ? 'la próxima hora' : `las próximas ${config.ventanaHoras} horas`;
+    res.locals.horariosTexto = resumenHorarios();
     next();
   });
   // En Netlify los archivos estáticos los sirve su CDN; esto cubre el uso local.

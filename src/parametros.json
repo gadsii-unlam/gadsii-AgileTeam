@@ -1,0 +1,29 @@
+{
+  "_ayuda": [
+    "Parámetros de reserva de Unlam Parking. Los cambios se aplican solos, sin reiniciar: guardá el archivo y recargá la página.",
+    "En Netlify se aplican al subir el cambio a la rama publicada (se vuelve a desplegar sola).",
+    "cuposPorTurno: lugares de cada turno. Cada turno tiene su propio cupo.",
+    "toleranciaMinutos: minutos después de la hora del turno para tocar «Llegué» (y para cancelar).",
+    "llegueDesdeMinutosAntes: desde cuántos minutos antes de la hora del turno se habilita «Llegué».",
+    "reservarHastaMinutosAntes: hasta cuántos minutos antes del turno se puede reservar (0 = hasta la hora de inicio).",
+    "reservarConHorasDeAnticipacion: con cuántas horas de anticipación como máximo se puede reservar (1 a 168).",
+    "horarios: turnos de cada día, en formato \"HH:MM\". [] = ese día no se reserva.",
+    "Un turno puede tener otro cupo: en lugar de \"19:00\" poner { \"hora\": \"19:00\", \"cupos\": 2 }."
+  ],
+
+  "cuposPorTurno": 3,
+  "toleranciaMinutos": 15,
+  "llegueDesdeMinutosAntes": 60,
+  "reservarHastaMinutosAntes": 0,
+  "reservarConHorasDeAnticipacion": 24,
+
+  "horarios": {
+    "lunes": ["08:00", "14:00", "19:00", "21:00"],
+    "martes": ["08:00", "14:00", "19:00", "16:00"],
+    "miercoles": ["08:00", "14:00", "19:00"],
+    "jueves": ["08:00", "14:00", "19:00"],
+    "viernes": ["08:00", "14:00", "19:00"],
+    "sabado": ["08:00", "14:00"],
+    "domingo": []
+  }
+}

@@ -1,5 +1,8 @@
-// Parámetros del MVP. Se pueden cambiar con variables de entorno sin tocar código
-// (no hay pantalla de administración en el MVP).
+// Parámetros técnicos del MVP (variables de entorno).
+// Los parámetros de reserva (horarios, cupos, tolerancia, «Llegué», anticipación) NO van acá:
+// están en parametros.json, que se relee solo cuando cambia (ver recargarParametros).
+const fs = require('node:fs');
+const parametros = require('./parametros');
 
 function entero(nombre, porDefecto) {
   const valor = process.env[nombre];
@@ -9,17 +12,7 @@ function entero(nombre, porDefecto) {
   return n;
 }
 
-// Lista de horas "HH:MM" separadas por coma (ej. "08:00,14:00,19:00").
-function horas(nombre, porDefecto) {
-  const valor = process.env[nombre];
-  const lista = valor ? valor.split(',').map((h) => h.trim()) : porDefecto;
-  for (const h of lista) {
-    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(h)) throw new Error(`${nombre}: "${h}" no es una hora HH:MM válida`);
-  }
-  return lista;
-}
-
-module.exports = {
+const config = {
   puerto: entero('PORT', 3000),
   host: process.env.HOST || '127.0.0.1',
   db: {
@@ -32,21 +25,52 @@ module.exports = {
   // Argentina no tiene horario de verano desde 2009: el offset es fijo.
   offsetUtc: '-03:00',
 
-  // Lugares por turno (cada turno tiene su propio cupo).
-  capacidad: entero('CAPACIDAD', 15),
-  toleranciaMin: entero('TOLERANCIA_MIN', 15),
-  // Turnos de llegada, según los horarios de cursada. Los sábados la universidad cierra a las 18
-  // y los domingos está cerrada.
-  turnos: {
-    semana: horas('TURNOS', ['08:00', '14:00', '19:00']),
-    sabado: horas('TURNOS_SABADO', ['08:00', '14:00']),
-  },
-  // Un turno se puede reservar hasta su hora de inicio (0 = sin anticipación mínima).
-  anticipacionMin: entero('ANTICIPACION_MIN', 0),
-  ventanaHoras: 24,
-  llegueDesdeMin: entero('LLEGUE_DESDE_MIN', 60),
+  // capacidad, toleranciaMin, llegueDesdeMin, anticipacionMin, ventanaHoras, turnos y cupos:
+  // salen de parametros.json (se cargan abajo).
 
   sesionDias: entero('SESION_DIAS', 5),
   intentosLoginMax: 8,
   bloqueoLoginMin: 10,
 };
+
+// Fecha de modificación de parametros.json la última vez que se leyó.
+let leidoMs = null;
+
+// Vuelve a leer parametros.json si cambió desde la última vez. Se llama en cada pedido: así se
+// pueden mostrar distintos escenarios en vivo con sólo guardar el archivo.
+// Si el archivo quedó con un error (por ejemplo, a medio editar), se sigue con los parámetros
+// anteriores y se avisa por consola; al arrancar, en cambio, un error corta la ejecución.
+function recargarParametros() {
+  if (leidoMs === Infinity) return; // parámetros fijados a mano (tests)
+  let modificadoMs;
+  try {
+    modificadoMs = fs.statSync(parametros.ARCHIVO).mtimeMs;
+  } catch {
+    modificadoMs = null;
+  }
+  if (leidoMs !== null && modificadoMs === leidoMs) return;
+  try {
+    Object.assign(config, parametros.leer());
+    if (leidoMs !== null) console.log(`Parámetros actualizados desde parametros.json (${new Date().toLocaleTimeString('es-AR')})`);
+    leidoMs = modificadoMs;
+  } catch (error) {
+    if (leidoMs === null) throw error;
+    console.error(`${error.message}. Se siguen usando los parámetros anteriores.`);
+    leidoMs = modificadoMs; // no repetir el aviso hasta el próximo cambio
+  }
+}
+
+// Fija los parámetros de reserva sin leer el archivo (los tests no dependen de parametros.json).
+function fijarParametros(json) {
+  Object.assign(config, parametros.validar(json));
+  leidoMs = Infinity;
+}
+
+recargarParametros();
+
+Object.defineProperties(config, {
+  recargarParametros: { value: recargarParametros },
+  fijarParametros: { value: fijarParametros },
+});
+
+module.exports = config;

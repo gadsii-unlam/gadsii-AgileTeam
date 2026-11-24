@@ -15,7 +15,7 @@
 const config = require('../config');
 const { una, todas, ejecutar } = require('../db/db');
 const { MIN, aEpoch, partesLocales } = require('./tiempo');
-const { turnosEnVentana } = require('./disponibilidad');
+const { turnosEnVentana, cuposDelTurno } = require('./disponibilidad');
 const { registrarEvento } = require('./eventos');
 
 class ErrorReserva extends Error {}
@@ -91,7 +91,7 @@ async function crearReserva(db, usuarioId, fecha, hora, ahoraMs = Date.now(), cf
        AND NOT EXISTS (
          SELECT 1 FROM reservas
          WHERE usuario_id = ?1 AND fecha = ?2 AND hora = ?3 AND estado = 'activa')`,
-    [usuarioId, fecha, hora, new Date(ahoraMs).toISOString(), cfg.capacidad, cfg.toleranciaMin * 60, segundos(ahoraMs)]
+    [usuarioId, fecha, hora, new Date(ahoraMs).toISOString(), cuposDelTurno(fecha, hora, cfg), cfg.toleranciaMin * 60, segundos(ahoraMs)]
   );
   if (cambios === 0) {
     if (await reservaPendiente(db, usuarioId, ahoraMs, cfg)) {

@@ -251,26 +251,57 @@ set PORT=3001 && npm start
 
 ## Configuración
 
-Se cambia con variables de entorno: en local, igual que `PORT` arriba (o en el `.env`); en
-producción, en Netlify → **Environment variables** (y redesplegar). No hay pantalla de
-administración en el MVP.
+### Parámetros de reserva: `parametros.json`
+
+Horarios, cupos, tolerancia y «Llegué» se configuran en **un único archivo: [`parametros.json`](parametros.json)**.
+**No hace falta reiniciar**: se guarda el archivo, se recarga la página y ya se ve el cambio (sirve para
+mostrar distintos escenarios en vivo). En producción, el cambio se aplica al subirlo a la rama
+publicada (Netlify vuelve a desplegar solo).
+
+| Clave | Por defecto | Qué es |
+|---|---|---|
+| `cuposPorTurno` | 15 | Lugares de cada turno (cada turno tiene su propio cupo) |
+| `toleranciaMinutos` | 15 | Minutos después de la hora del turno en los que se puede tocar «Llegué» (y cancelar) |
+| `llegueDesdeMinutosAntes` | 60 | Desde cuántos minutos antes de la hora del turno se habilita «Llegué» |
+| `reservarHastaMinutosAntes` | 0 | Hasta cuántos minutos antes del turno se puede reservar (0 = hasta la hora de inicio) |
+| `reservarConHorasDeAnticipacion` | 24 | Con cuántas horas de anticipación como máximo se puede reservar (1 a 168) |
+| `horarios` | L a V 08:00, 14:00, 19:00; sáb. 08:00, 14:00; dom. cerrado | Turnos de cada día (`lunes` … `domingo`, sin tildes). `[]` = cerrado |
+
+Un turno puede tener un cupo distinto: en lugar de `"19:00"` se pone `{ "hora": "19:00", "cupos": 2 }`
+(con `"cupos": 0` el turno aparece siempre lleno). Las claves que empiezan con `_` son comentarios.
+
+Ejemplo de escenario para una demo un domingo, con tolerancia corta y un turno casi lleno:
+
+```json
+  "toleranciaMinutos": 5,
+  "llegueDesdeMinutosAntes": 10,
+  "horarios": {
+    ...
+    "domingo": ["10:00", { "hora": "11:00", "cupos": 1 }]
+  }
+```
+
+Si el archivo queda mal escrito, la app sigue con los últimos parámetros válidos y muestra el error
+en la consola (al arrancar, en cambio, no inicia). `npm test` también lo valida, así que Netlify no
+publica un `parametros.json` con errores. Los tests usan sus propios parámetros, de modo que editar el
+archivo para una demo no los rompe.
+
+### Variables de entorno
+
+En local, igual que `PORT` arriba (o en el `.env`); en producción, en Netlify → **Environment
+variables** (y redesplegar).
 
 | Variable | Por defecto | Qué es |
 |---|---|---|
 | `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` | — (base local) | Base de Turso. Obligatorias en Netlify. |
-| `CAPACIDAD` | 15 | Lugares por turno (cada turno tiene su propio cupo) |
-| `TOLERANCIA_MIN` | 15 | Minutos de tolerancia después de la hora reservada |
-| `TURNOS` | 08:00,14:00,19:00 | Turnos de lunes a viernes |
-| `TURNOS_SABADO` | 08:00,14:00 | Turnos de los sábados (domingos cerrado) |
-| `ANTICIPACION_MIN` | 0 | Minutos de anticipación mínima para reservar (0 = se puede reservar hasta la hora de inicio) |
-| `LLEGUE_DESDE_MIN` | 60 | Desde cuántos minutos antes se habilita «Llegué» |
 | `SESION_DIAS` | 5 | Días que dura la sesión sin usar la app |
 | `PORT` / `HOST` | 3000 / 127.0.0.1 | Dónde escucha el servidor local |
 
-Cómo se calcula la disponibilidad: cada turno tiene `CAPACIDAD` lugares, que ocupan sólo las reservas
-activas de ese turno (llegue o no la persona: no hay liberación por vencimiento). Un turno se puede
-reservar hasta su hora de inicio y dentro de las próximas 24 h; desaparece al empezar o al llenarse,
-y vuelve a aparecer si alguien cancela. La lógica está en `dominio/disponibilidad.js`.
+Cómo se calcula la disponibilidad: cada turno tiene `cuposPorTurno` lugares (o su cupo propio), que
+ocupan sólo las reservas activas de ese turno (llegue o no la persona: no hay liberación por
+vencimiento). Un turno se puede reservar hasta su hora de inicio y dentro de las próximas
+`reservarConHorasDeAnticipacion` horas; desaparece al empezar o al llenarse, y vuelve a aparecer si
+alguien cancela. La lógica está en `dominio/disponibilidad.js`.
 
 ### Concurrencia
 
@@ -331,7 +362,9 @@ src/
   server.js            servidor para desarrollo local
   netlify/functions/   la app como función de Netlify
   app.js               rutas y pantallas (Express)
-  config.js            parámetros del MVP
+  config.js            parámetros técnicos (variables de entorno)
+  parametros.json      horarios, cupos, tolerancia y «Llegué» (se relee solo al cambiar)
+  parametros.js        lectura y validación de parametros.json
   db/                  esquema y conexión (Turso o archivo SQLite local)
   dominio/             lógica propia: disponibilidad, reservas, sesiones, eventos
   vistas/              pantallas (plantillas EJS, renderizadas en el servidor)
