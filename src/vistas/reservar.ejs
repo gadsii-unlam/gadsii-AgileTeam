@@ -11,6 +11,9 @@
     <% if (sinOpciones.completos) { %>
       <p class="estado-principal">Todos los turnos de las próximas 24 horas están completos</p>
       <p>Si alguien cancela, el lugar vuelve a aparecer. Probá de nuevo más tarde.</p>
+    <% } else if (sinOpciones.propios) { %>
+      <p class="estado-principal">No hay otros turnos para reservar en las próximas 24 horas</p>
+      <p>Ya tenés reserva en los turnos que todavía tienen lugar.</p>
     <% } else { %>
       <p class="estado-principal">Todavía no hay turnos para reservar</p>
       <p>Se puede reservar hasta 24 horas antes. El próximo turno es el <strong><%= sinOpciones.turno %></strong> y lo vas a poder reservar desde: <strong><%= sinOpciones.desde %></strong>.</p>

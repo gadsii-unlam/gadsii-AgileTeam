@@ -149,19 +149,23 @@ function crearApp({ db, reloj = () => Date.now(), confiarProxy = 'loopback' }) {
   // --- Reservar ----------------------------------------------------------
   async function mostrarReservar(req, res, { error = null, status = 200 } = {}) {
     const ahora = reloj();
-    const opciones = await opcionesReserva(db, ahora);
-    // Si no hay nada para elegir: ¿están todos completos o no hay turnos en las próximas 24 h?
+    const opciones = await opcionesReserva(db, ahora, undefined, req.usuario.id);
+    // Si no hay nada para elegir: ¿no hay turnos en las próximas 24 h, están todos completos,
+    // o los que quedan con lugar ya los reservó este usuario?
     let sinOpciones = null;
     if (opciones.length === 0) {
       const proximo = turnosEnVentana(ahora).length === 0 ? proximoTurnoFueraDeVentana(ahora) : null;
-      sinOpciones = proximo
-        ? {
-            turno: `${fechaLarga(proximo.fecha)} a las ${proximo.hora} hs`,
-            desde: minusculaInicial(
-              `${etiquetaFecha(partesLocales(proximo.reservableDesdeMs).fecha, ahora)} a las ${partesLocales(proximo.reservableDesdeMs).hora} hs`
-            ),
-          }
-        : { completos: true };
+      if (proximo) {
+        sinOpciones = {
+          turno: `${fechaLarga(proximo.fecha)} a las ${proximo.hora} hs`,
+          desde: minusculaInicial(
+            `${etiquetaFecha(partesLocales(proximo.reservableDesdeMs).fecha, ahora)} a las ${partesLocales(proximo.reservableDesdeMs).hora} hs`
+          ),
+        };
+      } else {
+        const hayLugar = (await opcionesReserva(db, ahora)).length > 0;
+        sinOpciones = hayLugar ? { propios: true } : { completos: true };
+      }
     }
     res.status(status).render('reservar', {
       opciones,

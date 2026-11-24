@@ -34,3 +34,7 @@ src/data/
 # Netlify CLI
 .netlify/
 src/PARA_USAR_PROD_BORRAR_NOMBRE.env
+
+#docs
+docs/evidencia/tp5/Prueba U1.mp4
+docs/evidencia/tp5/Prueba U2.mp4

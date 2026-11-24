@@ -8,6 +8,8 @@
 // - Un turno se puede reservar hasta su hora de inicio (o hasta `anticipacionMin` minutos antes,
 //   por defecto 0) y hasta 24 h desde ahora. Desaparece al empezar o al quedarse sin lugares, y
 //   vuelve a aparecer si alguien cancela.
+// - Un usuario no ve en las opciones los turnos en los que ya tiene una reserva activa (haya
+//   registrado o no la llegada); si la cancela, el turno le vuelve a aparecer.
 const config = require('../config');
 const { todas } = require('../db/db');
 const { MIN, aEpoch, partesLocales, sumarDias, etiquetaFecha } = require('./tiempo');
@@ -68,11 +70,26 @@ async function disponibilidad(db, ahoraMs, cfg = config) {
   }));
 }
 
+// Turnos ("fecha hora") en los que el usuario tiene una reserva activa.
+async function turnosReservados(db, usuarioId, fechas) {
+  const filas = await todas(
+    db,
+    `SELECT fecha, hora FROM reservas
+     WHERE usuario_id = ? AND estado = 'activa' AND fecha IN (${fechas.map(() => '?').join(',')})`,
+    [usuarioId, ...fechas]
+  );
+  return new Set(filas.map((f) => `${f.fecha} ${f.hora}`));
+}
+
 // Sólo lo que se puede elegir (H4): días con al menos un turno libre y turnos con lugares libres.
-async function opcionesReserva(db, ahoraMs, cfg = config) {
+// Si se indica el usuario, se omiten los turnos que ya tiene reservados.
+async function opcionesReserva(db, ahoraMs, cfg = config, usuarioId = null) {
+  const turnos = await disponibilidad(db, ahoraMs, cfg);
+  const propios =
+    usuarioId && turnos.length > 0 ? await turnosReservados(db, usuarioId, [...new Set(turnos.map((t) => t.fecha))]) : new Set();
   const porFecha = new Map();
-  for (const t of await disponibilidad(db, ahoraMs, cfg)) {
-    if (t.libres === 0) continue;
+  for (const t of turnos) {
+    if (t.libres === 0 || propios.has(`${t.fecha} ${t.hora}`)) continue;
     if (!porFecha.has(t.fecha)) {
       porFecha.set(t.fecha, { fecha: t.fecha, etiqueta: etiquetaFecha(t.fecha, ahoraMs), horas: [] });
     }

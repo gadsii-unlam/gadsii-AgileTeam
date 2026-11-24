@@ -3,7 +3,7 @@
 // Estados que ve el usuario (se calculan, no se guardan):
 // - pendiente:    activa, sin "Llegué" y todavía dentro de hora + tolerancia.
 // - llegada:      apretó "Llegué" antes de que termine la tolerancia.
-// - llegada_tarde: apretó "Llegué" después de la tolerancia.
+// - llegada_tarde: apretó "Llegué" después de la tolerancia (sólo en reservas viejas: hoy ya no se permite).
 // - no_llego:     pasó la tolerancia sin "Llegué". Es sólo informativo: no hay penalidad
 //                 y el lugar no se libera (ambas cosas están fuera del scope del MVP).
 // - cancelada
@@ -41,11 +41,12 @@ function puedeCancelar(r, ahoraMs, cfg = config) {
   return estadoReserva(r, ahoraMs, cfg) === 'pendiente';
 }
 
-// "Llegué" se habilita desde un rato antes de la hora reservada y hasta el fin de ese día.
+// "Llegué" se habilita desde un rato antes de la hora reservada y hasta que termina la tolerancia.
+// Después ya no: en el estacionamiento se ingresa por orden de llegada.
 function puedeRegistrarLlegada(r, ahoraMs, cfg = config) {
   if (r.estado !== 'activa' || r.llegada_registrada_en) return false;
-  if (partesLocales(ahoraMs).fecha !== r.fecha) return false;
-  return ahoraMs >= aEpoch(r.fecha, r.hora) - cfg.llegueDesdeMin * MIN;
+  const inicioMs = aEpoch(r.fecha, r.hora);
+  return ahoraMs >= inicioMs - cfg.llegueDesdeMin * MIN && ahoraMs <= inicioMs + cfg.toleranciaMin * MIN;
 }
 
 async function reservaPendiente(db, usuarioId, ahoraMs, cfg = config) {
@@ -75,7 +76,9 @@ async function crearReserva(db, usuarioId, fecha, hora, ahoraMs = Date.now(), cf
   if (!turnosEnVentana(ahoraMs, cfg).some((t) => t.fecha === fecha && t.hora === hora)) {
     throw new ErrorReserva('Ese turno ya no está disponible. Elegí otro, por favor.');
   }
-  // Se inserta sólo si hay cupo en el turno y el usuario no tiene otra reserva pendiente.
+  // Se inserta sólo si hay cupo en el turno, el usuario no tiene otra reserva pendiente y no tiene
+  // ya una reserva activa en ese mismo turno (aunque haya registrado la llegada). Si la canceló,
+  // puede volver a reservarlo.
   const { cambios, id } = await ejecutar(
     db,
     `INSERT INTO reservas (usuario_id, fecha, hora, creada_en)
@@ -84,12 +87,18 @@ async function crearReserva(db, usuarioId, fecha, hora, ahoraMs = Date.now(), cf
        AND NOT EXISTS (
          SELECT 1 FROM reservas
          WHERE usuario_id = ?1 AND estado = 'activa' AND llegada_registrada_en IS NULL
-           AND ${INICIO_SQL} + ?6 >= ?7)`,
+           AND ${INICIO_SQL} + ?6 >= ?7)
+       AND NOT EXISTS (
+         SELECT 1 FROM reservas
+         WHERE usuario_id = ?1 AND fecha = ?2 AND hora = ?3 AND estado = 'activa')`,
     [usuarioId, fecha, hora, new Date(ahoraMs).toISOString(), cfg.capacidad, cfg.toleranciaMin * 60, segundos(ahoraMs)]
   );
   if (cambios === 0) {
     if (await reservaPendiente(db, usuarioId, ahoraMs, cfg)) {
       throw new ErrorReserva('Ya tenés una reserva activa. Para hacer otra, primero cancelá la que tenés.');
+    }
+    if (await una(db, "SELECT 1 FROM reservas WHERE usuario_id = ? AND fecha = ? AND hora = ? AND estado = 'activa'", [usuarioId, fecha, hora])) {
+      throw new ErrorReserva('Ya tenés una reserva para ese turno. Elegí otro, por favor.');
     }
     throw new ErrorReserva('Ese turno ya no tiene lugares libres. Elegí otro, por favor.');
   }
@@ -115,11 +124,11 @@ async function registrarLlegada(db, usuarioId, reservaId, ahoraMs = Date.now(), 
     db,
     `UPDATE reservas SET llegada_registrada_en = ?3
      WHERE id = ?1 AND usuario_id = ?2 AND estado = 'activa' AND llegada_registrada_en IS NULL
-       AND fecha = ?4 AND ${INICIO_SQL} - ?5 <= ?6
+       AND ${INICIO_SQL} - ?4 <= ?5 AND ${INICIO_SQL} + ?6 >= ?5
      RETURNING fecha, hora`,
-    [reservaId, usuarioId, new Date(ahoraMs).toISOString(), partesLocales(ahoraMs).fecha, cfg.llegueDesdeMin * 60, segundos(ahoraMs)]
+    [reservaId, usuarioId, new Date(ahoraMs).toISOString(), cfg.llegueDesdeMin * 60, segundos(ahoraMs), cfg.toleranciaMin * 60]
   );
-  if (!r) throw new ErrorReserva('Todavía no podés registrar la llegada para esta reserva.');
+  if (!r) throw new ErrorReserva('No se puede registrar la llegada para esta reserva en este momento.');
   const minutos = Math.round((ahoraMs - aEpoch(r.fecha, r.hora)) / MIN);
   await registrarEvento(db, usuarioId, 'llegue', `${r.fecha} ${r.hora} (${minutos >= 0 ? '+' : ''}${minutos} min)`, ahoraMs);
 }

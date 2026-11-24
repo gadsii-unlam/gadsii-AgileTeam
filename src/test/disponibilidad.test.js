@@ -71,6 +71,23 @@ test('los turnos llenos no aparecen en las opciones (H4) y vuelven si alguien ca
   assert.equal(await ofrece19(), true);
 });
 
+test('el usuario no ve los turnos que ya reservó, aunque haya llegado; si cancela, los vuelve a ver', async () => {
+  const db = await baseDePrueba();
+  const usuario = await crearUsuario(db);
+  const otro = await crearUsuario(db, 'otro@alumno.unlam.edu.ar');
+  const { id } = await ejecutar(
+    db,
+    "INSERT INTO reservas (usuario_id, fecha, hora, creada_en, llegada_registrada_en) VALUES (?, '2026-11-02', '19:00', '', '2026-11-02T21:30:00.000Z')",
+    [usuario]
+  );
+  const ve19 = async (u) =>
+    (await opcionesReserva(db, LUNES_17, undefined, u)).find((o) => o.fecha === '2026-11-02')?.horas.some((h) => h.hora === '19:00') ?? false;
+  assert.equal(await ve19(usuario), false);
+  assert.equal(await ve19(otro), true);
+  await ejecutar(db, "UPDATE reservas SET estado = 'cancelada' WHERE id = ?", [id]);
+  assert.equal(await ve19(usuario), true);
+});
+
 test('etiquetas de fecha', () => {
   assert.equal(etiquetaFecha('2026-11-02', LUNES_17), 'Hoy, lunes 2/11');
   assert.equal(etiquetaFecha('2026-11-05', LUNES_17), 'jueves 5/11');
